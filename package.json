@@ -1,0 +1,13 @@
+{
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "dev": "pnpm -r run dev",
+    "test": "pnpm -r run test"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.0"
+  }
+}
