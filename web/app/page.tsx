@@ -10,6 +10,8 @@ import { ManageProjectReposModal } from './components/ManageProjectReposModal';
 import { AskRepoDoctorDrawer } from './components/AskRepoDoctorDrawer';
 import { OverviewView } from './components/OverviewView';
 import { VisualArchitectureView } from './components/VisualArchitectureView';
+import { CodeViewerModal } from './components/CodeViewerModal';
+import { FeatureKTModal } from './components/FeatureKTModal';
 import type {
   RepositoryDto,
   RepositoryDashboardDto,
@@ -23,6 +25,8 @@ import type {
   ProjectArchitectureDto,
   AskRepoDoctorResponseDto,
   ProjectAnalysisResultDto,
+  VisualTopologyNodeDto,
+  BusinessFeatureDto,
 } from '@repo-doctor/shared';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -74,6 +78,8 @@ export default function HomePage(): React.JSX.Element {
   const [isManageReposModalOpen, setIsManageReposModalOpen] = useState<boolean>(false);
   const [isAskDrawerOpen, setIsAskDrawerOpen] = useState<boolean>(false);
   const [askInitialQuestion, setAskInitialQuestion] = useState<string>('');
+  const [selectedCodeViewerNode, setSelectedCodeViewerNode] = useState<VisualTopologyNodeDto | null>(null);
+  const [selectedKTFeature, setSelectedKTFeature] = useState<BusinessFeatureDto | null>(null);
 
   // Repository & Graph state
   const [repositories, setRepositories] = useState<readonly RepositoryDto[]>([]);
@@ -1606,6 +1612,11 @@ export default function HomePage(): React.JSX.Element {
                   onSelectTab={(tab) => setActiveTab(tab)}
                   onUnlinkRepo={handleUnlinkProjectRepository}
                   onSelectRepoForInvestigation={(repoId) => setSelectedRepoId(repoId)}
+                  onOpenFeatureKT={(feat) => setSelectedKTFeature(feat)}
+                  onNavigateToFeatureFlow={(featId) => {
+                    setSelectedFeatureForArchitecture(featId);
+                    setActiveTab('architecture');
+                  }}
                 />
               ) : (
                 <DashboardView
@@ -1640,6 +1651,8 @@ export default function HomePage(): React.JSX.Element {
                   setSelectedFeatureForArchitecture(featureId || null);
                   setActiveTab('architecture');
                 }}
+                onOpenFeatureKT={(feat) => setSelectedKTFeature(feat)}
+                onOpenCodeViewer={(node) => setSelectedCodeViewerNode(node)}
               />
             )}
 
@@ -1658,6 +1671,7 @@ export default function HomePage(): React.JSX.Element {
                     setAskInitialQuestion(q);
                     setIsAskDrawerOpen(true);
                   }}
+                  onOpenCodeViewer={(node) => setSelectedCodeViewerNode(node)}
                 />
               ) : (
                 <ArchitectureExplorerView
@@ -1673,6 +1687,44 @@ export default function HomePage(): React.JSX.Element {
           </>
         )}
       </main>
+
+      {/* Code Viewer Modal */}
+      <CodeViewerModal
+        isOpen={Boolean(selectedCodeViewerNode)}
+        onClose={() => setSelectedCodeViewerNode(null)}
+        node={selectedCodeViewerNode}
+        allNodes={projectArchitecture?.nodes || []}
+        allEdges={projectArchitecture?.edges || []}
+        onOpenAskDoctor={(q) => {
+          setSelectedCodeViewerNode(null);
+          setAskInitialQuestion(q);
+          setIsAskDrawerOpen(true);
+        }}
+        onCalculateBlastRadius={handleCalculateBlastRadius}
+      />
+
+      {/* Feature KT & Architecture Flow Modal */}
+      <FeatureKTModal
+        isOpen={Boolean(selectedKTFeature)}
+        onClose={() => setSelectedKTFeature(null)}
+        feature={selectedKTFeature}
+        allNodes={projectArchitecture?.nodes || []}
+        allEdges={projectArchitecture?.edges || []}
+        onOpenCodeViewer={(node) => {
+          setSelectedKTFeature(null);
+          setSelectedCodeViewerNode(node);
+        }}
+        onNavigateToArchitecture={(featureId) => {
+          setSelectedKTFeature(null);
+          setSelectedFeatureForArchitecture(featureId);
+          setActiveTab('architecture');
+        }}
+        onOpenAskDoctor={(q) => {
+          setSelectedKTFeature(null);
+          setAskInitialQuestion(q);
+          setIsAskDrawerOpen(true);
+        }}
+      />
 
       {/* Floating Persistent Ask RepoDoctor Launcher */}
       {user && (

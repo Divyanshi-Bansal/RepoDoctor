@@ -25,6 +25,847 @@ const STARTER_QUESTIONS = [
   'What happens if I modify a service in cadence-api?',
 ];
 
+function renderInlineFormatting(text: string): React.ReactNode {
+  if (!text) return null;
+  const codeParts = text.split(/(`[^`]+`)/g);
+  return codeParts.map((part, i) => {
+    if (part.startsWith('`') && part.endsWith('`')) {
+      const code = part.slice(1, -1);
+      return (
+        <code
+          key={i}
+          style={{
+            backgroundColor: '#eff6ff',
+            color: '#1d4ed8',
+            padding: '0.12rem 0.4rem',
+            borderRadius: '4px',
+            fontFamily: 'monospace',
+            fontSize: '0.85em',
+            fontWeight: 700,
+            border: '1px solid #dbeafe',
+          }}
+        >
+          {code}
+        </code>
+      );
+    }
+
+    const boldParts = part.split(/(\*\*[^*]+\*\*)/g);
+    return boldParts.map((bPart, j) => {
+      if (bPart.startsWith('**') && bPart.endsWith('**')) {
+        const boldText = bPart.slice(2, -2);
+        return <strong key={`${i}-${j}`} style={{ fontWeight: 800, color: '#0f172a' }}>{boldText}</strong>;
+      }
+
+      const italicParts = bPart.split(/(\*[^*]+\*)/g);
+      return italicParts.map((iPart, k) => {
+        if (iPart.startsWith('*') && iPart.endsWith('*') && !iPart.startsWith('**')) {
+          const itText = iPart.slice(1, -1);
+          return <em key={`${i}-${j}-${k}`} style={{ color: '#475569', fontStyle: 'italic' }}>{itText}</em>;
+        }
+        return iPart;
+      });
+    });
+  });
+}
+
+interface ParsedStep {
+  number: number;
+  title: string;
+  lane: string;
+  repo: string;
+  component: string;
+  method?: string;
+  networkCall?: string;
+  action: string;
+}
+
+interface ParsedFileProfile {
+  fileName: string;
+  repository: string;
+  role: string;
+  nodeType: string;
+  filePath: string;
+  plainEnglishRole: string;
+  callers: string[];
+  dependencies: string[];
+}
+
+function parseSeniorBriefing(raw: string) {
+  const lines = raw.split('\n');
+
+  let briefingTitle = '';
+  let questionText = '';
+  let executiveOverview = '';
+  let fileProfile: ParsedFileProfile | null = null;
+  const journeySteps: ParsedStep[] = [];
+  const consequences: string[] = [];
+  const whereToStart: string[] = [];
+  let callTree = '';
+  const friendlyDeps: string[] = [];
+  let persistenceInfo = '';
+  let eventingInfo = '';
+  const citations: string[] = [];
+  const genericSections: Array<{ title?: string; content: string[] }> = [];
+
+  let currentSection = 'HEADER';
+  let tempLines: string[] = [];
+
+  const commitCurrentSection = (nextSection: string) => {
+    if (tempLines.length > 0) {
+      if (currentSection === 'EXECUTIVE_OVERVIEW') {
+        executiveOverview = tempLines.join('\n').trim();
+      } else if (currentSection === 'CALL_TREE') {
+        callTree = tempLines.join('\n').replace(/```text/g, '').replace(/```/g, '').trim();
+      } else if (currentSection === 'PERSISTENCE') {
+        persistenceInfo = tempLines.join(' ').replace(/^Involved database entities:\s*/i, '').trim();
+      } else if (currentSection === 'EVENTING') {
+        eventingInfo = tempLines.join(' ').replace(/^Involved message queue\(s\):\s*/i, '').trim();
+      } else if (currentSection === 'GENERIC') {
+        genericSections.push({ content: [...tempLines] });
+      }
+      tempLines = [];
+    }
+    currentSection = nextSection;
+  };
+
+  let inCodeBlock = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      if (currentSection === 'CALL_TREE') {
+        continue;
+      }
+    }
+
+    if (currentSection === 'CALL_TREE' && inCodeBlock) {
+      tempLines.push(line);
+      continue;
+    }
+
+    if (trimmed.startsWith('### 🎓') || trimmed.startsWith('### Senior Engineer') || trimmed.startsWith('### 🎓 Senior Engineer')) {
+      commitCurrentSection('HEADER');
+      briefingTitle = trimmed.replace(/^###\s*🎓?\s*/, '').replace(/^Senior Engineer Technical Briefing:\s*/i, '').trim();
+      continue;
+    }
+
+    if (trimmed.startsWith('**Question:**')) {
+      questionText = trimmed.replace(/^\*\*Question:\*\*\s*"?/, '').replace(/"?$/, '').trim();
+      continue;
+    }
+
+    if (trimmed.startsWith('#### 📄 File Understanding:')) {
+      commitCurrentSection('FILE_PROFILE');
+      const fileNameMatch = trimmed.match(/####\s*📄?\s*File Understanding:\s*`?([^`\n]+)`?/i);
+      fileProfile = {
+        fileName: fileNameMatch ? fileNameMatch[1] : 'Component',
+        repository: '',
+        role: '',
+        nodeType: '',
+        filePath: '',
+        plainEnglishRole: '',
+        callers: [],
+        dependencies: [],
+      };
+      continue;
+    }
+
+    if (fileProfile && currentSection === 'FILE_PROFILE') {
+      if (trimmed.startsWith('• **Repository:**')) {
+        fileProfile.repository = trimmed.replace(/^•\s*\*\*Repository:\*\*\s*\*?/, '').replace(/\*?$/, '').trim();
+        continue;
+      }
+      if (trimmed.startsWith('• **Component Role:**')) {
+        const roleMatch = trimmed.match(/`([^`]+)`\s*(?:\(`([^`]+)`\))?/);
+        if (roleMatch) {
+          fileProfile.role = roleMatch[1] || '';
+          fileProfile.nodeType = roleMatch[2] || '';
+        }
+        continue;
+      }
+      if (trimmed.startsWith('• **File Path:**')) {
+        fileProfile.filePath = trimmed.replace(/^•\s*\*\*File Path:\*\*\s*`?/, '').replace(/`?$/, '').trim();
+        continue;
+      }
+      if (trimmed.startsWith('• **Plain-English Role:**')) {
+        fileProfile.plainEnglishRole = trimmed.replace(/^•\s*\*\*Plain-English Role:\*\*\s*/, '').trim();
+        continue;
+      }
+      if (trimmed.startsWith('**Who Calls or Imports This File')) {
+        commitCurrentSection('FILE_CALLERS');
+        continue;
+      }
+    }
+
+    if (currentSection === 'FILE_CALLERS') {
+      if (trimmed.startsWith('**What This File Depends On')) {
+        commitCurrentSection('FILE_DEPS');
+        continue;
+      }
+      if (trimmed.startsWith('**⚠️ Consequences')) {
+        commitCurrentSection('CONSEQUENCES');
+        continue;
+      }
+      if (trimmed.startsWith('•')) {
+        fileProfile?.callers.push(trimmed.replace(/^•\s*/, '').replace(/`/g, ''));
+        continue;
+      }
+    }
+
+    if (currentSection === 'FILE_DEPS') {
+      if (trimmed.startsWith('**⚠️ Consequences')) {
+        commitCurrentSection('CONSEQUENCES');
+        continue;
+      }
+      if (trimmed.startsWith('•')) {
+        fileProfile?.dependencies.push(trimmed.replace(/^•\s*/, '').replace(/`/g, ''));
+        continue;
+      }
+    }
+
+    if (trimmed.startsWith('**Executive Architecture Overview:**')) {
+      commitCurrentSection('EXECUTIVE_OVERVIEW');
+      continue;
+    }
+
+    if (trimmed.startsWith('**Step-by-Step Execution Journey')) {
+      commitCurrentSection('JOURNEY');
+      continue;
+    }
+
+    if (trimmed.startsWith('**⚠️ Consequences')) {
+      commitCurrentSection('CONSEQUENCES');
+      continue;
+    }
+
+    if (trimmed.startsWith('**🚀 Where to Start')) {
+      commitCurrentSection('WHERE_TO_START');
+      continue;
+    }
+
+    if (trimmed.startsWith('**Step-by-Step Architectural Flow & Methods:**')) {
+      commitCurrentSection('ARCH_METHODS');
+      continue;
+    }
+
+    if (trimmed.startsWith('**🌳 Visual Call & Method Tree:**')) {
+      commitCurrentSection('CALL_TREE');
+      continue;
+    }
+
+    if (trimmed.startsWith('**📋 Friendly File Dependencies')) {
+      commitCurrentSection('FRIENDLY_DEPS');
+      continue;
+    }
+
+    if (trimmed.startsWith('**Persistence Layer:**')) {
+      commitCurrentSection('PERSISTENCE');
+      continue;
+    }
+
+    if (trimmed.startsWith('**Asynchronous Eventing:**')) {
+      commitCurrentSection('EVENTING');
+      continue;
+    }
+
+    if (trimmed.startsWith('**Grounding & Evidence Citations:**')) {
+      commitCurrentSection('CITATIONS');
+      continue;
+    }
+
+    if (currentSection === 'JOURNEY') {
+      const stepHeaderMatch = trimmed.match(/^(\d+)\.\s*\*\*([^*]+)\*\*\s*\((?:'|`|‘)?([A-Z]+)(?:'|`|’)?\s+in\s+\*([^*]+)\*\):/);
+      if (stepHeaderMatch) {
+        journeySteps.push({
+          number: parseInt(stepHeaderMatch[1], 10),
+          title: stepHeaderMatch[2].trim(),
+          lane: stepHeaderMatch[3].trim(),
+          repo: stepHeaderMatch[4].trim(),
+          component: '',
+          method: '',
+          networkCall: '',
+          action: '',
+        });
+        continue;
+      }
+
+      if (journeySteps.length > 0) {
+        const activeStep = journeySteps[journeySteps.length - 1];
+        if (trimmed.includes('↳ Component:')) {
+          const parts = trimmed.replace(/^↳\s*Component:\s*/, '').split('➔').map((s) => s.trim().replace(/`/g, ''));
+          activeStep.component = parts[0] || '';
+          activeStep.method = parts[1] || '';
+          if (parts.length > 2) {
+            activeStep.networkCall = parts[2] || '';
+          }
+          continue;
+        }
+        if (trimmed.includes('↳ Action:')) {
+          activeStep.action = trimmed.replace(/^↳\s*Action:\s*/, '').trim();
+          continue;
+        }
+      }
+      continue;
+    }
+
+    if (currentSection === 'CONSEQUENCES') {
+      if (trimmed.startsWith('•')) {
+        consequences.push(trimmed.replace(/^•\s*/, ''));
+      } else if (trimmed && !trimmed.startsWith('**')) {
+        consequences.push(trimmed);
+      }
+      continue;
+    }
+
+    if (currentSection === 'WHERE_TO_START') {
+      if (trimmed.startsWith('•')) {
+        whereToStart.push(trimmed.replace(/^•\s*/, ''));
+      } else if (trimmed && !trimmed.startsWith('**')) {
+        whereToStart.push(trimmed);
+      }
+      continue;
+    }
+
+    if (currentSection === 'FRIENDLY_DEPS') {
+      if (trimmed.startsWith('•')) {
+        friendlyDeps.push(trimmed.replace(/^•\s*/, ''));
+      }
+      continue;
+    }
+
+    if (currentSection === 'CITATIONS') {
+      if (trimmed.startsWith('•')) {
+        citations.push(trimmed.replace(/^•\s*`?/, '').replace(/`?$/, ''));
+      }
+      continue;
+    }
+
+    tempLines.push(line);
+  }
+
+  commitCurrentSection('DONE');
+
+  return {
+    briefingTitle,
+    questionText,
+    executiveOverview,
+    fileProfile,
+    journeySteps,
+    consequences,
+    whereToStart,
+    callTree,
+    friendlyDeps,
+    persistenceInfo,
+    eventingInfo,
+    citations,
+    genericSections,
+  };
+}
+
+interface BriefingAnswerViewerProps {
+  readonly answer: string;
+  readonly query: string;
+  readonly onNavigateFlow?: () => void;
+}
+
+function BriefingAnswerViewer({ answer, query, onNavigateFlow }: BriefingAnswerViewerProps): React.JSX.Element {
+  const parsed = parseSeniorBriefing(answer);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* 1. Header Hero Card */}
+      <div
+        style={{
+          padding: '1.25rem 1.5rem',
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%)',
+          border: '1.5px solid #bfdbfe',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <span
+            style={{
+              fontSize: '0.7rem',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              padding: '0.2rem 0.55rem',
+              borderRadius: '4px',
+              backgroundColor: '#dbeafe',
+              color: '#1e40af',
+            }}
+          >
+            🎓 Senior Architect Briefing
+          </span>
+
+          {onNavigateFlow && (
+            <button
+              type="button"
+              className="primary-btn"
+              onClick={onNavigateFlow}
+              style={{
+                fontSize: '0.8rem',
+                padding: '0.35rem 0.85rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+              }}
+            >
+              <span>🎬</span>
+              <span>View Storyboard in Architecture ➔</span>
+            </button>
+          )}
+        </div>
+
+        <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1e3a8a', margin: 0, lineHeight: 1.35 }}>
+          {parsed.briefingTitle || 'System Architecture Technical Flow'}
+        </h3>
+
+        <div
+          style={{
+            fontSize: '0.85rem',
+            color: '#334155',
+            backgroundColor: '#ffffff',
+            padding: '0.5rem 0.85rem',
+            borderRadius: '6px',
+            border: '1px solid #cbd5e1',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+          }}
+        >
+          <span style={{ fontWeight: 700, color: '#1e40af' }}>💬 Query:</span>
+          <span style={{ fontStyle: 'italic', color: '#475569' }}>
+            "{parsed.questionText || query}"
+          </span>
+        </div>
+      </div>
+
+      {/* 2. File Profile (When user asked about a specific file) */}
+      {parsed.fileProfile && (
+        <div
+          style={{
+            padding: '1.25rem',
+            borderRadius: '10px',
+            backgroundColor: '#ffffff',
+            border: '1.5px solid #cbd5e1',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.85rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.2rem' }}>📄</span>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                {parsed.fileProfile.fileName}
+              </h4>
+            </div>
+            <div style={{ display: 'flex', gap: '0.35rem' }}>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: '4px', backgroundColor: '#e0e7ff', color: '#3730a3' }}>
+                {parsed.fileProfile.role || 'COMPONENT'}
+              </span>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#475569' }}>
+                📁 {parsed.fileProfile.repository || 'system'}
+              </span>
+            </div>
+          </div>
+
+          <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace' }}>
+            📍 {parsed.fileProfile.filePath}
+          </div>
+
+          {parsed.fileProfile.plainEnglishRole && (
+            <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#166534', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <span>💡</span> WHAT THIS FILE DOES:
+              </div>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#14532d', lineHeight: 1.5 }}>
+                {parsed.fileProfile.plainEnglishRole}
+              </p>
+            </div>
+          )}
+
+          {/* Inbound Callers & Outbound Dependencies */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.75rem' }}>
+            {parsed.fileProfile.callers.length > 0 && (
+              <div style={{ padding: '0.75rem', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
+                  📥 Inbound Callers ({parsed.fileProfile.callers.length}):
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  {parsed.fileProfile.callers.map((c, i) => (
+                    <div key={i} style={{ fontSize: '0.78rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <span style={{ color: '#2563eb' }}>↳</span>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{c}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {parsed.fileProfile.dependencies.length > 0 && (
+              <div style={{ padding: '0.75rem', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
+                  📤 Outbound Dependencies ({parsed.fileProfile.dependencies.length}):
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  {parsed.fileProfile.dependencies.map((d, i) => (
+                    <div key={i} style={{ fontSize: '0.78rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <span style={{ color: '#16a34a' }}>↳</span>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{d}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 3. Executive Architecture Overview */}
+      {parsed.executiveOverview && (
+        <div
+          style={{
+            padding: '1.25rem',
+            borderRadius: '10px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderLeft: '4px solid #2563eb',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '1.1rem' }}>🏢</span>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+              Executive Architecture Overview
+            </h4>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#334155', lineHeight: 1.6 }}>
+            {renderInlineFormatting(parsed.executiveOverview)}
+          </p>
+        </div>
+      )}
+
+      {/* 4. Step-by-Step Execution Journey (Interactive Cards) */}
+      {parsed.journeySteps.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <div>
+            <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.2rem' }}>
+              🎬 Step-by-Step Execution Journey (Client ➔ API ➔ Service ➔ Database)
+            </h4>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
+              How user interactions flow across browser components, backend controllers, and database tables:
+            </p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {parsed.journeySteps.map((step) => {
+              const laneColor =
+                step.lane === 'CLIENT'
+                  ? { bg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8', icon: '🖥️' }
+                  : step.lane === 'API'
+                  ? { bg: '#fef3c7', border: '#fde68a', text: '#92400e', icon: '⚡' }
+                  : step.lane === 'SERVICE'
+                  ? { bg: '#faf5ff', border: '#e9d5ff', text: '#7e22ce', icon: '⚙️' }
+                  : { bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d', icon: '🗄️' };
+
+              return (
+                <div
+                  key={step.number}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'stretch',
+                    gap: '0.85rem',
+                    padding: '0.9rem 1rem',
+                    borderRadius: '10px',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                  }}
+                >
+                  {/* Step Number Circle */}
+                  <div
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: '#2563eb',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.85rem',
+                      fontWeight: 800,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {step.number}
+                  </div>
+
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    {/* Header: Title + Lane Badge + Repo */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.35rem' }}>
+                      <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>
+                        {step.title}
+                      </span>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <span
+                          style={{
+                            fontSize: '0.7rem',
+                            fontWeight: 700,
+                            padding: '0.12rem 0.45rem',
+                            borderRadius: '4px',
+                            backgroundColor: laneColor.bg,
+                            border: `1px solid ${laneColor.border}`,
+                            color: laneColor.text,
+                          }}
+                        >
+                          {laneColor.icon} {step.lane}
+                        </span>
+                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                          📁 {step.repo}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Component + Method + Network Call */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
+                        {step.component}
+                      </span>
+                      {step.method && (
+                        <>
+                          <span style={{ color: '#2563eb', fontWeight: 700, fontSize: '0.8rem' }}>➔</span>
+                          <span
+                            style={{
+                              fontFamily: 'monospace',
+                              fontWeight: 700,
+                              fontSize: '0.78rem',
+                              color: '#1d4ed8',
+                              backgroundColor: '#eff6ff',
+                              padding: '0.1rem 0.35rem',
+                              borderRadius: '4px',
+                              border: '1px solid #dbeafe',
+                            }}
+                          >
+                            ƒ {step.method}
+                          </span>
+                        </>
+                      )}
+                      {step.networkCall && (
+                        <span
+                          style={{
+                            fontFamily: 'monospace',
+                            fontWeight: 700,
+                            fontSize: '0.75rem',
+                            color: '#92400e',
+                            backgroundColor: '#fef3c7',
+                            padding: '0.1rem 0.35rem',
+                            borderRadius: '4px',
+                            border: '1px solid #fde68a',
+                          }}
+                        >
+                          {step.networkCall}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Action Description */}
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
+                      {step.action}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 5. Consequences & Blast Radius Alert Box */}
+      {parsed.consequences.length > 0 && (
+        <div
+          style={{
+            padding: '1.25rem',
+            borderRadius: '10px',
+            backgroundColor: '#fffbeb',
+            border: '1.5px solid #fde68a',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.45rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <span style={{ fontSize: '1.2rem' }}>💥</span>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#92400e', margin: 0 }}>
+              Consequences of Modifying (Blast Radius)
+            </h4>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            {parsed.consequences.map((c, i) => (
+              <div key={i} style={{ fontSize: '0.85rem', color: '#78350f', lineHeight: 1.5 }}>
+                {renderInlineFormatting(c)}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 6. Where to Start Guide (Onboarding) */}
+      {parsed.whereToStart.length > 0 && (
+        <div
+          style={{
+            padding: '1.25rem',
+            borderRadius: '10px',
+            backgroundColor: '#f0fdf4',
+            border: '1.5px solid #bbf7d0',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.45rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <span style={{ fontSize: '1.2rem' }}>🚀</span>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#166534', margin: 0 }}>
+              Where to Start (New Developer Onboarding Guide)
+            </h4>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            {parsed.whereToStart.map((w, i) => (
+              <div key={i} style={{ fontSize: '0.85rem', color: '#14532d', lineHeight: 1.5 }}>
+                {renderInlineFormatting(w)}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 7. Visual Call Tree Terminal */}
+      {parsed.callTree && (
+        <div
+          style={{
+            borderRadius: '10px',
+            overflow: 'hidden',
+            backgroundColor: '#0f172a',
+            border: '1px solid #1e293b',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          }}
+        >
+          <div
+            style={{
+              padding: '0.5rem 0.85rem',
+              backgroundColor: '#1e293b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: '1px solid #334155',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ef4444', display: 'inline-block' }} />
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b', display: 'inline-block' }} />
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }} />
+              <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#94a3b8', marginLeft: '0.5rem' }}>
+                🌳 Call &amp; Method Hierarchy
+              </span>
+            </div>
+            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>verified AST</span>
+          </div>
+
+          <pre
+            style={{
+              margin: 0,
+              padding: '1rem',
+              fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+              fontSize: '0.825rem',
+              lineHeight: 1.6,
+              color: '#38bdf8',
+              overflowX: 'auto',
+              whiteSpace: 'pre-wrap',
+            }}
+          >
+            {parsed.callTree}
+          </pre>
+        </div>
+      )}
+
+      {/* 8. Friendly Dependencies */}
+      {parsed.friendlyDeps.length > 0 && (
+        <div
+          style={{
+            padding: '1.25rem',
+            borderRadius: '10px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem' }}>
+            <span style={{ fontSize: '1.1rem' }}>📋</span>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+              Friendly File Dependencies ({parsed.friendlyDeps.length})
+            </h4>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            {parsed.friendlyDeps.map((dep, idx) => (
+              <div
+                key={idx}
+                style={{
+                  fontSize: '0.82rem',
+                  padding: '0.45rem 0.75rem',
+                  borderRadius: '6px',
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  color: '#334155',
+                  lineHeight: 1.45,
+                }}
+              >
+                {renderInlineFormatting(dep)}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 9. Persistence & Queues metadata pills */}
+      {(parsed.persistenceInfo || parsed.eventingInfo) && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
+          {parsed.persistenceInfo && (
+            <div style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', borderRadius: '6px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534' }}>
+              <strong>🗄️ Database Entities:</strong> {parsed.persistenceInfo}
+            </div>
+          )}
+          {parsed.eventingInfo && (
+            <div style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', borderRadius: '6px', backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', color: '#7e22ce' }}>
+              <strong>📬 Message Queues:</strong> {parsed.eventingInfo}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 10. Generic fallback sections */}
+      {parsed.genericSections.map((sec, sIdx) => {
+        const text = sec.content.join('\n').trim();
+        if (!text) return null;
+        return (
+          <div key={sIdx} style={{ fontSize: '0.9rem', lineHeight: 1.6, color: '#334155' }}>
+            {renderInlineFormatting(text)}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function AskRepoDoctorDrawer({
   isOpen,
   onClose,
@@ -128,7 +969,7 @@ export function AskRepoDoctorDrawer({
         className="drawer-panel"
         style={{
           width: '100%',
-          maxWidth: '720px',
+          maxWidth: '840px',
           height: '100vh',
           backgroundColor: '#ffffff',
           boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.12)',
@@ -400,21 +1241,16 @@ export function AskRepoDoctorDrawer({
                   )}
                 </div>
 
-                {/* Natural Answer Content */}
-                <div
-                  style={{
-                    fontSize: '1rem',
-                    lineHeight: 1.7,
-                    color: '#0f172a',
-                    whiteSpace: 'pre-wrap',
-                  }}
-                >
-                  {response.answer}
-                </div>
+                {/* User-Friendly Structured Briefing Viewer */}
+                <BriefingAnswerViewer
+                  answer={response.answer}
+                  query={query}
+                  onNavigateFlow={handleViewFlow}
+                />
               </div>
 
-              {/* ── Step-by-Step Flow Timeline ── */}
-              {response.flowSteps.length > 0 && (
+              {/* ── Step-by-Step Flow Timeline (fallback if not in briefing) ── */}
+              {response.flowSteps.length > 0 && !response.answer.includes('Step-by-Step Execution Journey') && (
                 <div
                   style={{
                     padding: '1.25rem',
@@ -480,6 +1316,25 @@ export function AskRepoDoctorDrawer({
                             <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
                               {step.componentName}
                             </span>
+                            {step.methodName && (
+                              <>
+                                <span style={{ color: '#2563eb', fontWeight: 700 }}>➔</span>
+                                <span
+                                  style={{
+                                    fontFamily: 'monospace',
+                                    fontWeight: 700,
+                                    fontSize: '0.8rem',
+                                    color: '#1d4ed8',
+                                    backgroundColor: '#eff6ff',
+                                    padding: '0.1rem 0.35rem',
+                                    borderRadius: '4px',
+                                    border: '1px solid #dbeafe',
+                                  }}
+                                >
+                                  {step.methodName}
+                                </span>
+                              </>
+                            )}
                             <span
                               style={{
                                 fontSize: '0.7rem',
@@ -525,6 +1380,11 @@ export function AskRepoDoctorDrawer({
                           {step.targetName && (
                             <div style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: '#2563eb', fontWeight: 600 }}>
                               ↳ Connects to: {step.targetName}
+                              {step.targetMethodName && (
+                                <span style={{ fontFamily: 'monospace', marginLeft: '0.3rem', color: '#1d4ed8' }}>
+                                  ➔ {step.targetMethodName}
+                                </span>
+                              )}
                               {step.targetRepositoryName && step.targetRepositoryName !== step.repositoryName && (
                                 <span style={{ marginLeft: '0.4rem', color: '#b45309' }}>
                                   [Cross-Repo: {step.targetRepositoryName}]

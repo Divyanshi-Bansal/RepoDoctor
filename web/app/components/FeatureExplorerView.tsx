@@ -17,6 +17,8 @@ interface FeatureExplorerViewProps {
   readonly isAnalyzing?: boolean;
   readonly onOpenAskDoctor?: (initialQuestion: string) => void;
   readonly onNavigateArchitectureFlow?: (featureTitle?: string) => void;
+  readonly onOpenFeatureKT?: (feature: BusinessFeatureDto) => void;
+  readonly onOpenCodeViewer?: (node: any) => void;
 }
 
 export function FeatureExplorerView({
@@ -29,6 +31,8 @@ export function FeatureExplorerView({
   isAnalyzing,
   onOpenAskDoctor,
   onNavigateArchitectureFlow,
+  onOpenFeatureKT,
+  onOpenCodeViewer,
 }: FeatureExplorerViewProps): React.JSX.Element {
   const hasProjectFeatures = Boolean(projectFeatures && projectFeatures.length > 0);
   const [viewMode, setViewMode] = useState<'features' | 'components'>(
@@ -257,11 +261,21 @@ export function FeatureExplorerView({
                     </div>
 
                     {/* Action Buttons */}
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      {onOpenAskDoctor && (
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      {onOpenFeatureKT && (
                         <button
                           type="button"
                           className="primary-btn"
+                          onClick={() => onOpenFeatureKT(selectedBusinessFeature)}
+                          style={{ fontSize: '0.85rem', padding: '0.45rem 0.95rem', fontWeight: 700, backgroundColor: '#4f46e5' }}
+                        >
+                          🎓 Get Feature KT &amp; Flow
+                        </button>
+                      )}
+                      {onOpenAskDoctor && (
+                        <button
+                          type="button"
+                          className="secondary-btn"
                           onClick={() => onOpenAskDoctor(`Explain the complete system flow for ${selectedBusinessFeature.title}`)}
                           style={{ fontSize: '0.85rem', padding: '0.45rem 0.9rem', fontWeight: 600 }}
                         >
@@ -285,6 +299,27 @@ export function FeatureExplorerView({
                   <p style={{ margin: 0, fontSize: '0.95rem', color: '#475569', lineHeight: 1.6 }}>
                     {selectedBusinessFeature.description}
                   </p>
+
+                  {/* Natural Language Explanation if present */}
+                  {selectedBusinessFeature.naturalLanguageExplanation && (
+                    <div
+                      style={{
+                        padding: '0.75rem 1rem',
+                        backgroundColor: '#eff6ff',
+                        borderRadius: '8px',
+                        border: '1px solid #bfdbfe',
+                        fontSize: '0.9rem',
+                        color: '#1e3a8a',
+                        lineHeight: 1.55,
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <span>💡</span>
+                        <span>Plain-English Knowledge Transfer (KT):</span>
+                      </div>
+                      <div>{selectedBusinessFeature.naturalLanguageExplanation}</div>
+                    </div>
+                  )}
                 </div>
 
                 {/* 2. Participating Components Hierarchy */}
@@ -300,7 +335,7 @@ export function FeatureExplorerView({
                     Participating Components &amp; Architecture Roles ({selectedBusinessFeature.participatingComponents.length})
                   </h3>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.85rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.85rem' }}>
                     {selectedBusinessFeature.participatingComponents.map((comp) => (
                       <div
                         key={comp.id}
@@ -311,11 +346,11 @@ export function FeatureExplorerView({
                           backgroundColor: '#f8fafc',
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '0.35rem',
+                          gap: '0.4rem',
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>
+                          <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a' }}>
                             {comp.name}
                           </span>
                           <span
@@ -331,8 +366,64 @@ export function FeatureExplorerView({
                             {comp.type}
                           </span>
                         </div>
-                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                          📁 Repository: <strong>{comp.repositoryName}</strong>
+
+                        {/* Method / Function */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem' }}>
+                          <span style={{ color: '#64748b', fontWeight: 600 }}>Method:</span>
+                          <span
+                            style={{
+                              fontFamily: 'monospace',
+                              fontWeight: 700,
+                              color: '#1d4ed8',
+                              backgroundColor: '#eff6ff',
+                              padding: '0.05rem 0.3rem',
+                              borderRadius: '3px',
+                            }}
+                          >
+                            {comp.primaryMethod || 'execute()'}
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.2rem' }}>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            📁 <strong>{comp.repositoryName}</strong>
+                          </div>
+
+                          {onOpenCodeViewer && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                onOpenCodeViewer({
+                                  id: comp.id,
+                                  displayName: comp.name,
+                                  identifier: comp.id,
+                                  repositoryId: '',
+                                  repositoryName: comp.repositoryName,
+                                  role: comp.type as any,
+                                  nodeType: 'FILE' as any,
+                                  filePath: comp.name,
+                                  primaryMethod: comp.primaryMethod || 'execute()',
+                                  methods: [],
+                                  incomingCount: 0,
+                                  outgoingCount: 0,
+                                  metadata: {},
+                                })
+                              }
+                              style={{
+                                fontSize: '0.75rem',
+                                padding: '0.2rem 0.5rem',
+                                borderRadius: '4px',
+                                border: '1px solid #cbd5e1',
+                                backgroundColor: '#ffffff',
+                                color: '#2563eb',
+                                cursor: 'pointer',
+                                fontWeight: 600,
+                              }}
+                              title={`Open code for ${comp.name}`}
+                            >
+                              🔍 View Code
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}

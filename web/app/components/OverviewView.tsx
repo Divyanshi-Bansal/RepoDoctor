@@ -18,6 +18,8 @@ interface OverviewViewProps {
   readonly onSelectTab: (tab: 'dashboard' | 'features' | 'architecture') => void;
   readonly onUnlinkRepo: (repoId: string) => Promise<void>;
   readonly onSelectRepoForInvestigation?: (repoId: string) => void;
+  readonly onOpenFeatureKT?: (feature: BusinessFeatureDto) => void;
+  readonly onNavigateToFeatureFlow?: (featureId: string) => void;
 }
 
 const POPULAR_QUESTIONS = [
@@ -39,6 +41,8 @@ export function OverviewView({
   onSelectTab,
   onUnlinkRepo,
   onSelectRepoForInvestigation,
+  onOpenFeatureKT,
+  onNavigateToFeatureFlow,
 }: OverviewViewProps): React.JSX.Element {
   const [quickQuery, setQuickQuery] = useState('');
   const [unlinkingRepoId, setUnlinkingRepoId] = useState<string | null>(null);
@@ -356,6 +360,133 @@ export function OverviewView({
         </div>
       </div>
 
+      {/* ── 2.5 New Developer Onboarding: System Architecture Blueprint ── */}
+      <div
+        className="card-section"
+        style={{
+          border: '1.5px solid #cbd5e1',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          backgroundColor: '#ffffff',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+              <span style={{ fontSize: '1.4rem' }}>🚀</span>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary, #0f172a)', margin: 0 }}>
+                New Developer Onboarding: System Architecture Blueprint
+              </h2>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.875rem', color: '#475569', lineHeight: 1.5 }}>
+              Unfamiliar with this codebase? Here is how this multi-repository system connects client user interfaces, backend API routes, business logic, and databases.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={() => onSelectTab('architecture')}
+            style={{ fontSize: '0.85rem', padding: '0.45rem 0.95rem' }}
+          >
+            🎬 Open Interactive Storyboard ➔
+          </button>
+        </div>
+
+        {/* 3-Tier Multi-Repo Flow Visualization */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '1rem',
+            padding: '1.25rem',
+            backgroundColor: '#f8fafc',
+            borderRadius: '10px',
+            border: '1px solid #e2e8f0',
+            marginBottom: '1.25rem',
+          }}
+        >
+          {/* Step 1: Client Web */}
+          <div style={{ backgroundColor: '#ffffff', border: '1.5px solid #dbeafe', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#1e40af', backgroundColor: '#eff6ff', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                LAYER 1 &bull; CLIENT UI
+              </span>
+              <span style={{ fontSize: '1.1rem' }}>🖥️</span>
+            </div>
+            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>
+              cadence-web
+            </div>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.45 }}>
+              Next.js 14 App Router, React 18, Tailwind CSS. Renders views and issues REST HTTP API calls.
+            </p>
+          </div>
+
+          {/* Step 2: Backend API */}
+          <div style={{ backgroundColor: '#ffffff', border: '1.5px solid #bbf7d0', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#15803d', backgroundColor: '#f0fdf4', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                LAYER 2 &bull; API &amp; LOGIC
+              </span>
+              <span style={{ fontSize: '1.1rem' }}>⚡</span>
+            </div>
+            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>
+              cadence-api
+            </div>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.45 }}>
+              NestJS backend. Contains REST Controllers, JwtAuthGuard, domain Services, and TypeORM entities.
+            </p>
+          </div>
+
+          {/* Step 3: Database & Queue */}
+          <div style={{ backgroundColor: '#ffffff', border: '1.5px solid #e9d5ff', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#7e22ce', backgroundColor: '#faf5ff', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                LAYER 3 &bull; PERSISTENCE
+              </span>
+              <span style={{ fontSize: '1.1rem' }}>🗄️</span>
+            </div>
+            <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>
+              PostgreSQL 16 &amp; Redis
+            </div>
+            <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b', lineHeight: 1.45 }}>
+              ACID relational tables (Users, Projects, Tasks) + pgvector semantic embeddings + BullMQ workers.
+            </p>
+          </div>
+        </div>
+
+        {/* Quick Knowledge Transfer Questions */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', backgroundColor: '#f1f5f9', padding: '0.75rem 1rem', borderRadius: '8px' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#334155' }}>
+            💡 Quick KT for new team members:
+          </span>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => onAskQuestion('I am new to this project: give me an executive KT on the architecture and key features.')}
+              style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#1e40af', fontWeight: 600, cursor: 'pointer' }}
+            >
+              🎓 Executive Onboarding KT
+            </button>
+            <button
+              type="button"
+              onClick={() => onAskQuestion('What happens if I modify a service in cadence-api? What are the breaking consequences?')}
+              style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#92400e', fontWeight: 600, cursor: 'pointer' }}
+            >
+              ⚠️ Blast Radius &amp; Breaking Risks
+            </button>
+            <button
+              type="button"
+              onClick={() => onAskQuestion('Explain how user login works end to end across frontend and backend.')}
+              style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', borderRadius: '6px', border: '1px solid #cbd5e1', backgroundColor: '#ffffff', color: '#15803d', fontWeight: 600, cursor: 'pointer' }}
+            >
+              🔐 Trace Auth Flow
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* ── 3. Evidence-Backed Feature Capabilities ── */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -427,7 +558,7 @@ export function OverviewView({
                   {/* Participating Components */}
                   <div style={{ marginBottom: '0.75rem' }}>
                     <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
-                      PARTICIPATING COMPONENTS:
+                      PARTICIPATING COMPONENTS &amp; METHODS:
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
                       {feat.participatingComponents.slice(0, 4).map((comp) => (
@@ -442,8 +573,13 @@ export function OverviewView({
                             border: '1px solid #cbd5e1',
                           }}
                         >
-                          {comp.name}{' '}
-                          <span style={{ color: '#2563eb', fontWeight: 600 }}>({comp.repositoryName})</span>
+                          <strong>{comp.name}</strong>
+                          {comp.primaryMethod && (
+                            <span style={{ color: '#2563eb', fontFamily: 'monospace', fontWeight: 600 }}>
+                              {' '}➔ {comp.primaryMethod}
+                            </span>
+                          )}
+                          <span style={{ color: '#64748b', fontSize: '0.7rem' }}> ({comp.repositoryName})</span>
                         </span>
                       ))}
                       {feat.participatingComponents.length > 4 && (
@@ -468,19 +604,32 @@ export function OverviewView({
                   <button
                     type="button"
                     className="primary-btn"
-                    onClick={() => onAskQuestion(`Explain the complete system flow for ${feat.title}`)}
-                    style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', textAlign: 'center', fontWeight: 600 }}
+                    onClick={() => {
+                      if (onOpenFeatureKT) {
+                        onOpenFeatureKT(feat);
+                      } else {
+                        onAskQuestion(`Explain the complete system flow for ${feat.title}`);
+                      }
+                    }}
+                    style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', textAlign: 'center', fontWeight: 600, backgroundColor: '#4f46e5' }}
                   >
                     🎓 Get Feature KT &amp; Flow
                   </button>
                   <button
                     type="button"
                     className="secondary-btn"
-                    onClick={() => onSelectTab('architecture')}
-                    style={{ padding: '0.5rem 0.85rem', fontSize: '0.85rem' }}
-                    title="View connected architecture flow"
+                    onClick={() => {
+                      if (onNavigateToFeatureFlow) {
+                        onNavigateToFeatureFlow(feat.id);
+                      } else {
+                        onSelectTab('architecture');
+                      }
+                    }}
+                    style={{ padding: '0.5rem 0.85rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
+                    title="View connected architecture flow & storyboard"
                   >
-                    🕸️ View Flow
+                    <span>🎬</span>
+                    <span>Storyboard</span>
                   </button>
                 </div>
               </div>
