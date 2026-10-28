@@ -184,6 +184,7 @@ export interface BusinessFeatureDto {
   readonly id: string;
   readonly title: string;
   readonly description: string;
+  readonly naturalLanguageExplanation?: string;
   readonly category: 'AUTHENTICATION' | 'ORDER_PROCESSING' | 'PAYMENTS' | 'NOTIFICATIONS' | 'DATA_STORAGE' | 'API_SERVICES' | 'GENERAL';
   readonly entryPoint?: string;
   readonly participatingComponents: readonly {
@@ -191,11 +192,29 @@ export interface BusinessFeatureDto {
     readonly name: string;
     readonly type: NodeType;
     readonly repositoryName: string;
+    readonly primaryMethod?: string;
+    readonly methods?: readonly string[];
+    readonly filePath?: string;
+    readonly codeSnippet?: string;
+    readonly lineStart?: number;
+    readonly lineEnd?: number;
   }[];
   readonly relatedRepositories: readonly string[];
   readonly dataStores: readonly string[];
   readonly externalServices: readonly string[];
   readonly citationsCount: number;
+  readonly sequenceSteps?: readonly {
+    readonly stepNumber: number;
+    readonly title: string;
+    readonly lane: 'CLIENT' | 'API' | 'SERVICE' | 'DATABASE';
+    readonly componentName: string;
+    readonly repositoryName: string;
+    readonly primaryMethod?: string;
+    readonly description: string;
+    readonly networkCall?: string;
+  }[];
+  readonly consequencesOfChange?: string;
+  readonly whereToStartGuide?: string;
 }
 
 export interface ProjectDashboardDto {
@@ -224,6 +243,14 @@ export interface FlowStepDto {
   readonly isInferred: boolean;
   readonly targetName?: string;
   readonly targetRepositoryName?: string;
+  readonly methodName?: string;
+  readonly targetMethodName?: string;
+  readonly filePath?: string;
+  readonly codeSnippet?: string;
+  readonly lineStart?: number;
+  readonly lineEnd?: number;
+  readonly plainEnglishRole?: string;
+  readonly consequencesOfChange?: string;
 }
 
 export interface AskRepoDoctorQueryDto {
@@ -258,12 +285,25 @@ export interface VisualTopologyNodeDto extends TopologyNodeDto {
   readonly role: 'FRONTEND' | 'API' | 'SERVICE' | 'DATABASE' | 'QUEUE' | 'PACKAGE';
   readonly incomingCount: number;
   readonly outgoingCount: number;
+  readonly filePath?: string;
+  readonly primaryMethod?: string;
+  readonly methods?: readonly string[];
+  readonly codeSnippet?: string;
+  readonly lineStart?: number;
+  readonly lineEnd?: number;
+  readonly plainEnglishRole?: string;
+  readonly consequencesOfChange?: string;
 }
 
 export interface VisualTopologyEdgeDto extends TopologyEdgeDto {
   readonly sourceRepositoryName?: string;
   readonly targetRepositoryName?: string;
   readonly isCrossRepository: boolean;
+  readonly friendlyDescription?: string;
+  readonly codeSnippet?: string;
+  readonly lineStart?: number;
+  readonly lineEnd?: number;
+  readonly filePath?: string;
 }
 
 export interface ProjectArchitectureDto {
