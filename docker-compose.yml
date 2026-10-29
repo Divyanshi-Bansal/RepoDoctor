@@ -9,9 +9,10 @@ services:
       POSTGRES_PASSWORD: repodoctor_dev
       POSTGRES_DB: repodoctor
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U repodoctor -d repodoctor"]
       interval: 10s
@@ -32,6 +33,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  adminer:
+    image: adminer:latest
+    container_name: repodoctor-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      - postgres
 
 volumes:
   postgres_data:

@@ -31,3 +31,6 @@ Thumbs.db
 
 # Ephemeral Agent Artifacts (Keep persistent rules and skills; ignore transient scratch)
 .agents/scratch/
+
+*.sql
+scripts/

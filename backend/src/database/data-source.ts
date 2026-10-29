@@ -71,22 +71,46 @@ export const GRAPH_ENGINE_ENTITIES = [
 
 /** Build a strongly-typed Postgres DataSourceOptions from environment variables.
  * Accepts partial overrides for tests (e.g. migrationsRun, logging).
+ * Supports both individual DB_* parameters and a complete DATABASE_URL (e.g. Neon, Supabase).
  */
 export function buildDataSourceOptions(
   overrides: Partial<PostgresConnectionOptions> = {},
 ): PostgresConnectionOptions {
+  const databaseUrl = process.env['DATABASE_URL'];
+  const isNeonOrSsl = Boolean(
+    databaseUrl?.includes('sslmode=require') ||
+    databaseUrl?.includes('neon.tech') ||
+    process.env['DB_SSL'] === 'true',
+  );
+
+  const baseOptions: PostgresConnectionOptions = databaseUrl
+    ? {
+        type: 'postgres',
+        url: databaseUrl,
+        ssl: isNeonOrSsl ? { rejectUnauthorized: false } : false,
+        entities: GRAPH_ENGINE_ENTITIES,
+        migrations: ['dist/migrations/*.js'],
+        migrationsTableName: 'typeorm_migrations',
+        synchronize: false,
+        logging: process.env['DB_LOGGING'] === 'true',
+      }
+    : {
+        type: 'postgres',
+        host: process.env['DB_HOST'] ?? 'localhost',
+        port: Number(process.env['DB_PORT'] ?? 5432),
+        username: process.env['DB_USER'] ?? 'repodoctor',
+        password: process.env['DB_PASSWORD'] ?? 'repodoctor_dev',
+        database: process.env['DB_NAME'] ?? 'repodoctor',
+        ssl: isNeonOrSsl ? { rejectUnauthorized: false } : false,
+        entities: GRAPH_ENGINE_ENTITIES,
+        migrations: ['dist/migrations/*.js'],
+        migrationsTableName: 'typeorm_migrations',
+        synchronize: false,
+        logging: process.env['DB_LOGGING'] === 'true',
+      };
+
   return {
-    type: 'postgres',
-    host: process.env['DB_HOST'] ?? 'localhost',
-    port: Number(process.env['DB_PORT'] ?? 5432),
-    username: process.env['DB_USER'] ?? 'repodoctor',
-    password: process.env['DB_PASSWORD'] ?? 'repodoctor_dev',
-    database: process.env['DB_NAME'] ?? 'repodoctor',
-    entities: GRAPH_ENGINE_ENTITIES,
-    migrations: ['dist/migrations/*.js'],
-    migrationsTableName: 'typeorm_migrations',
-    synchronize: false, // Schema is managed exclusively by migration files.
-    logging: process.env['DB_LOGGING'] === 'true',
+    ...baseOptions,
     ...overrides,
   };
 }

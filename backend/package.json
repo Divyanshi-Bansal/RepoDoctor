@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc --build",
     "start": "node dist/main.js",
+    "dev": "pnpm run start:dev",
     "start:dev": "ts-node -r ./test/cjs-ext-hook.cjs -r tsconfig-paths/register src/main.ts",
     "test": "vitest run",
     "test:integration": "node --require ./test/cjs-ext-hook.cjs --require ts-node/register/transpile-only --test 'src/graph-engine/__tests__/*.integration.spec.ts'",
