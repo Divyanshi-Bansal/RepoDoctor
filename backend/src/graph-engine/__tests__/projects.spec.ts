@@ -180,7 +180,7 @@ describe('ProjectsService', () => {
       expect(storedRepositories[1].id).toBe('repo-2');
     });
 
-    it('rejects assigning a repository that belongs to another project', async () => {
+    it('reassigns a repository when moving it to another project', async () => {
       const projA = await service.createProject('user-1', { name: 'Project A' });
       const projB = await service.createProject('user-1', { name: 'Project B' });
 
@@ -188,10 +188,9 @@ describe('ProjectsService', () => {
       await service.setProjectRepositories('user-1', projA.id, ['repo-1']);
       expect(storedRepositories[0].projectId).toBe(projA.id);
 
-      // Attempt to assign repo-1 to Project B should reject with BadRequestException
-      await expect(
-        service.setProjectRepositories('user-1', projB.id, ['repo-1']),
-      ).rejects.toThrow(BadRequestException);
+      // Assign repo-1 to Project B safely reassigns it
+      await service.setProjectRepositories('user-1', projB.id, ['repo-1']);
+      expect(storedRepositories[0].projectId).toBe(projB.id);
     });
 
     it('rejects non-existent repository IDs', async () => {

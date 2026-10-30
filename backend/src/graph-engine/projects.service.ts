@@ -192,16 +192,12 @@ export class ProjectsService {
 
     const targetSet = new Set(repositoryIds);
 
-    // 0. Validate all incoming repository IDs exist and do not belong to another project
+    // 0. Validate all incoming repository IDs exist
+    // If a repository was linked to an old/previous project, reassign it seamlessly to this project
     for (const repoId of repositoryIds) {
       const repo = await this.repositoryRepo.findOne({ where: { id: repoId } });
       if (!repo) {
         throw new NotFoundException(`Repository with ID '${repoId}' not found`);
-      }
-      if (repo.projectId && repo.projectId !== projectId) {
-        throw new BadRequestException(
-          `Repository '${repo.name}' is already assigned to another project`,
-        );
       }
     }
 

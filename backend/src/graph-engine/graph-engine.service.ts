@@ -34,6 +34,8 @@ import type {
 @Injectable()
 export class GraphEngineService {
   private readonly logger = new Logger(GraphEngineService.name);
+  private static readonly repoListCache = new Map<string, { timestamp: number; repos: readonly RepositoryDto[] }>();
+  private static readonly REPO_CACHE_TTL_MS = 60_000; // 60 seconds
 
   constructor(
     private readonly dataSource: DataSource,
@@ -60,6 +62,11 @@ export class GraphEngineService {
       gitlabUsername?: string | null;
     },
   ): Promise<readonly RepositoryDto[]> {
+    const cacheKey = `${userId}:${options?.actualUserId || ''}:${options?.githubUsername || ''}:${options?.gitlabUsername || ''}`;
+    const cached = GraphEngineService.repoListCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < GraphEngineService.REPO_CACHE_TTL_MS) {
+      return cached.repos;
+    }
     const actualUserId = options?.actualUserId;
     const gitlabToken = options?.gitlabToken;
     let githubUsername = options?.githubUsername ?? null;
@@ -89,9 +96,10 @@ export class GraphEngineService {
     const results: RepositoryDto[] = [];
 
     // 1. Fetch remote GitHub repositories if user has a connected GitHub token
+    // Using affiliation=owner,collaborator includes repositories you own (73) plus repositories you contribute to as an invited collaborator
     if (accessToken) {
       try {
-        const response = await fetch('https://api.github.com/user/repos?per_page=100&affiliation=owner&sort=updated', {
+        const response = await fetch('https://api.github.com/user/repos?per_page=100&affiliation=owner,collaborator&sort=updated', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             Accept: 'application/vnd.github.v3+json',
@@ -110,16 +118,12 @@ export class GraphEngineService {
             owner: { login: string };
             default_branch: string;
             updated_at: string;
+            permissions?: { admin?: boolean; push?: boolean; pull?: boolean };
           }>;
 
           for (const ghRepo of githubRepos) {
             const org = ghRepo.owner.login;
             const name = ghRepo.name;
-
-            // If a connected GitHub account is known, strictly ignore repos belonging to other accounts
-            if (githubUsername && org.toLowerCase() !== githubUsername.toLowerCase()) {
-              continue;
-            }
 
             // Find or pre-register in database
             let repoEntity = await this.repoRepo.findOne({
@@ -247,6 +251,7 @@ export class GraphEngineService {
       }
     }
 
+    GraphEngineService.repoListCache.set(cacheKey, { timestamp: Date.now(), repos: results });
     return results;
   }
 
