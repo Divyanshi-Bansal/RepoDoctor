@@ -28,6 +28,14 @@ function isSecureCookie(): boolean {
   );
 }
 
+function getCookieSameSite(): 'lax' | 'none' | 'strict' {
+  const envVal = process.env['COOKIE_SAMESITE']?.toLowerCase();
+  if (envVal === 'none' || envVal === 'lax' || envVal === 'strict') {
+    return envVal;
+  }
+  return isSecureCookie() ? 'none' : 'lax';
+}
+
 function getFrontendUrl(): string {
   return process.env['FRONTEND_URL'] || 'http://localhost:3000';
 }
@@ -98,7 +106,7 @@ export class AuthController {
     res.cookie('session', session.id, {
       httpOnly: true,
       secure,
-      sameSite: 'lax',
+      sameSite: getCookieSameSite(),
       path: '/',
       maxAge: maxAgeMs,
     });
@@ -106,7 +114,7 @@ export class AuthController {
     res.cookie('csrf_token', session.csrfToken, {
       httpOnly: false,
       secure,
-      sameSite: 'lax',
+      sameSite: getCookieSameSite(),
       path: '/',
       maxAge: maxAgeMs,
     });
@@ -147,7 +155,7 @@ export class AuthController {
     res.cookie('session', session.id, {
       httpOnly: true,
       secure,
-      sameSite: 'lax',
+      sameSite: getCookieSameSite(),
       path: '/',
       maxAge: maxAgeMs,
     });
@@ -155,7 +163,7 @@ export class AuthController {
     res.cookie('csrf_token', session.csrfToken, {
       httpOnly: false,
       secure,
-      sameSite: 'lax',
+      sameSite: getCookieSameSite(),
       path: '/',
       maxAge: maxAgeMs,
     });
@@ -186,7 +194,7 @@ export class AuthController {
     res.cookie('oauth_state', state, {
       httpOnly: true,
       secure,
-      sameSite: 'lax',
+      sameSite: getCookieSameSite(),
       path: '/auth',
       maxAge: 10 * 60 * 1000, // 10 minutes
     });
@@ -295,7 +303,7 @@ export class AuthController {
       res.cookie('session', session.id, {
         httpOnly: true,
         secure,
-        sameSite: 'lax',
+        sameSite: getCookieSameSite(),
         path: '/',
         maxAge: maxAgeMs,
       });
@@ -304,7 +312,7 @@ export class AuthController {
       res.cookie('csrf_token', session.csrfToken, {
         httpOnly: false,
         secure,
-        sameSite: 'lax',
+        sameSite: getCookieSameSite(),
         path: '/',
         maxAge: maxAgeMs,
       });
@@ -337,7 +345,7 @@ export class AuthController {
     res.cookie('gitlab_oauth_state', state, {
       httpOnly: true,
       secure,
-      sameSite: 'lax',
+      sameSite: getCookieSameSite(),
       path: '/auth',
       maxAge: 10 * 60 * 1000,
     });
@@ -430,7 +438,7 @@ export class AuthController {
         res.cookie('session', session.id, {
           httpOnly: true,
           secure,
-          sameSite: 'lax',
+          sameSite: getCookieSameSite(),
           path: '/',
           maxAge: maxAgeMs,
         });
@@ -438,7 +446,7 @@ export class AuthController {
         res.cookie('csrf_token', session.csrfToken, {
           httpOnly: false,
           secure,
-          sameSite: 'lax',
+          sameSite: getCookieSameSite(),
           path: '/',
           maxAge: maxAgeMs,
         });
@@ -509,8 +517,8 @@ export class AuthController {
     }
 
     const secure = isSecureCookie();
-    res.clearCookie('session', { path: '/', httpOnly: true, secure, sameSite: 'lax' });
-    res.clearCookie('csrf_token', { path: '/', httpOnly: false, secure, sameSite: 'lax' });
+    res.clearCookie('session', { path: '/', httpOnly: true, secure, sameSite: getCookieSameSite() });
+    res.clearCookie('csrf_token', { path: '/', httpOnly: false, secure, sameSite: getCookieSameSite() });
 
     res.json({ success: true });
   }
