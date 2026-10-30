@@ -6,6 +6,10 @@ import type {
   CodeLocationCitationDto,
   FlowStepDto,
 } from '@repo-doctor/shared';
+import { Button } from './atlassian/Button';
+import { Lozenge } from './atlassian/Lozenge';
+import { Badge } from './atlassian/Badge';
+import { EmptyState } from './atlassian/EmptyState';
 
 interface AskRepoDoctorDrawerProps {
   readonly isOpen: boolean;
@@ -25,6 +29,125 @@ const STARTER_QUESTIONS = [
   'What happens if I modify a service in cadence-api?',
 ];
 
+/* ── Atlassian Design System Clean SVG Icons ── */
+
+function ChatSparkleIcon(): React.JSX.Element {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path
+        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon(): React.JSX.Element {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function GraphFlowIcon(): React.JSX.Element {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="5" cy="6" r="3" stroke="currentColor" strokeWidth="2" />
+      <circle cx="19" cy="6" r="3" stroke="currentColor" strokeWidth="2" />
+      <circle cx="12" cy="18" r="3" stroke="currentColor" strokeWidth="2" />
+      <path d="M7.5 7.5L10 16M16.5 7.5L14 16" stroke="currentColor" strokeWidth="1.75" />
+    </svg>
+  );
+}
+
+function StoryboardIcon(): React.JSX.Element {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="2" y="4" width="20" height="16" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="M10 8l6 4-6 4V8z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function RepoBranchIcon(): React.JSX.Element {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path
+        d="M6 3v12M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 6a9 9 0 0 1-9 9"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function FileDocumentIcon(): React.JSX.Element {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path
+        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" strokeWidth="1.5" />
+      <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function AlertTriangleIcon(): React.JSX.Element {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path
+        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+        stroke="#FFAB00"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <line x1="12" y1="9" x2="12" y2="13" stroke="#FFAB00" strokeWidth="2" strokeLinecap="round" />
+      <line x1="12" y1="17" x2="12.01" y2="17" stroke="#FFAB00" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CompassIcon(): React.JSX.Element {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" stroke="#006644" strokeWidth="2" />
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="#006644" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon({ isExpanded }: { readonly isExpanded: boolean }): React.JSX.Element {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{
+        transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+        transition: 'transform 0.2s ease',
+      }}
+      aria-hidden="true"
+    >
+      <polyline points="6 9 12 15 18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function renderInlineFormatting(text: string): React.ReactNode {
   if (!text) return null;
   const codeParts = text.split(/(`[^`]+`)/g);
@@ -35,14 +158,14 @@ function renderInlineFormatting(text: string): React.ReactNode {
         <code
           key={i}
           style={{
-            backgroundColor: '#eff6ff',
-            color: '#1d4ed8',
-            padding: '0.12rem 0.4rem',
-            borderRadius: '4px',
-            fontFamily: 'monospace',
+            backgroundColor: '#F4F5F7',
+            color: '#172B4D',
+            padding: '2px 6px',
+            borderRadius: '3px',
+            fontFamily: 'SFMono-Medium, "Segoe UI Mono", Menlo, Consolas, monospace',
             fontSize: '0.85em',
-            fontWeight: 700,
-            border: '1px solid #dbeafe',
+            fontWeight: 600,
+            border: '1px solid #DFE1E6',
           }}
         >
           {code}
@@ -54,14 +177,22 @@ function renderInlineFormatting(text: string): React.ReactNode {
     return boldParts.map((bPart, j) => {
       if (bPart.startsWith('**') && bPart.endsWith('**')) {
         const boldText = bPart.slice(2, -2);
-        return <strong key={`${i}-${j}`} style={{ fontWeight: 800, color: '#0f172a' }}>{boldText}</strong>;
+        return (
+          <strong key={`${i}-${j}`} style={{ fontWeight: 600, color: '#172B4D' }}>
+            {boldText}
+          </strong>
+        );
       }
 
       const italicParts = bPart.split(/(\*[^*]+\*)/g);
       return italicParts.map((iPart, k) => {
         if (iPart.startsWith('*') && iPart.endsWith('*') && !iPart.startsWith('**')) {
           const itText = iPart.slice(1, -1);
-          return <em key={`${i}-${j}-${k}`} style={{ color: '#475569', fontStyle: 'italic' }}>{itText}</em>;
+          return (
+            <em key={`${i}-${j}-${k}`} style={{ color: '#6B778C', fontStyle: 'italic' }}>
+              {itText}
+            </em>
+          );
         }
         return iPart;
       });
@@ -377,135 +508,191 @@ function BriefingAnswerViewer({ answer, query, onNavigateFlow }: BriefingAnswerV
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-      {/* 1. Header Hero Card */}
+      {/* ── 1. Header Hero Card (ADS Styled) ── */}
       <div
         style={{
-          padding: '1.25rem 1.5rem',
-          borderRadius: '12px',
-          background: 'linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%)',
-          border: '1.5px solid #bfdbfe',
+          padding: '16px 20px',
+          borderRadius: '3px',
+          backgroundColor: '#FFFFFF',
+          border: '1px solid #DFE1E6',
+          boxShadow: '0 1px 1px rgba(9, 30, 66, 0.15)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.75rem',
+          gap: '12px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <span
-            style={{
-              fontSize: '0.7rem',
-              fontWeight: 800,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              padding: '0.2rem 0.55rem',
-              borderRadius: '4px',
-              backgroundColor: '#dbeafe',
-              color: '#1e40af',
-            }}
-          >
-            🎓 Senior Architect Briefing
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <Lozenge appearance="inprogress" isBold>
+            Senior Architect Briefing
+          </Lozenge>
 
           {onNavigateFlow && (
-            <button
-              type="button"
-              className="primary-btn"
-              onClick={onNavigateFlow}
-              style={{
-                fontSize: '0.8rem',
-                padding: '0.35rem 0.85rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-              }}
-            >
-              <span>🎬</span>
-              <span>View Storyboard in Architecture ➔</span>
-            </button>
+            <Button appearance="primary" spacing="compact" onClick={onNavigateFlow}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <StoryboardIcon />
+                <span>View Storyboard in Architecture →</span>
+              </span>
+            </Button>
           )}
         </div>
 
-        <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1e3a8a', margin: 0, lineHeight: 1.35 }}>
+        <h3
+          style={{
+            fontSize: '18px',
+            fontWeight: 600,
+            color: '#172B4D',
+            margin: 0,
+            lineHeight: '24px',
+          }}
+        >
           {parsed.briefingTitle || 'System Architecture Technical Flow'}
         </h3>
 
+        {/* Query Quote Panel */}
         <div
           style={{
-            fontSize: '0.85rem',
-            color: '#334155',
-            backgroundColor: '#ffffff',
-            padding: '0.5rem 0.85rem',
-            borderRadius: '6px',
-            border: '1px solid #cbd5e1',
+            fontSize: '13px',
+            color: '#172B4D',
+            backgroundColor: '#FAFBFC',
+            padding: '8px 12px',
+            borderRadius: '3px',
+            border: '1px solid #DFE1E6',
+            borderLeft: '3px solid #0052CC',
             display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
+            alignItems: 'baseline',
+            gap: '8px',
           }}
         >
-          <span style={{ fontWeight: 700, color: '#1e40af' }}>💬 Query:</span>
-          <span style={{ fontStyle: 'italic', color: '#475569' }}>
+          <span
+            style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              color: '#0052CC',
+              flexShrink: 0,
+            }}
+          >
+            Query
+          </span>
+          <span style={{ color: '#42526E', lineHeight: '20px' }}>
             "{parsed.questionText || query}"
           </span>
         </div>
       </div>
 
-      {/* 2. File Profile (When user asked about a specific file) */}
+      {/* ── 2. File Profile (When user queried a specific file) ── */}
       {parsed.fileProfile && (
         <div
           style={{
-            padding: '1.25rem',
-            borderRadius: '10px',
-            backgroundColor: '#ffffff',
-            border: '1.5px solid #cbd5e1',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            padding: '16px',
+            borderRadius: '3px',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #DFE1E6',
+            boxShadow: '0 1px 1px rgba(9, 30, 66, 0.08)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.85rem',
+            gap: '12px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.2rem' }}>📄</span>
-              <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '3px',
+                  backgroundColor: '#DEEBFF',
+                  color: '#0052CC',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <FileDocumentIcon />
+              </div>
+              <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#172B4D', margin: 0 }}>
                 {parsed.fileProfile.fileName}
               </h4>
             </div>
-            <div style={{ display: 'flex', gap: '0.35rem' }}>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: '4px', backgroundColor: '#e0e7ff', color: '#3730a3' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Lozenge appearance="new" isBold>
                 {parsed.fileProfile.role || 'COMPONENT'}
-              </span>
-              <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: '4px', backgroundColor: '#f1f5f9', color: '#475569' }}>
-                📁 {parsed.fileProfile.repository || 'system'}
+              </Lozenge>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '12px',
+                  color: '#6B778C',
+                  backgroundColor: '#FAFBFC',
+                  border: '1px solid #DFE1E6',
+                  borderRadius: '3px',
+                  padding: '2px 6px',
+                }}
+              >
+                <RepoBranchIcon />
+                <span>{parsed.fileProfile.repository || 'system'}</span>
               </span>
             </div>
           </div>
 
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontFamily: 'monospace' }}>
-            📍 {parsed.fileProfile.filePath}
+          <div
+            style={{
+              fontSize: '12px',
+              fontFamily: 'SFMono-Medium, "Segoe UI Mono", Menlo, Consolas, monospace',
+              color: '#42526E',
+              backgroundColor: '#FAFBFC',
+              padding: '6px 10px',
+              borderRadius: '3px',
+              border: '1px solid #DFE1E6',
+              wordBreak: 'break-all',
+            }}
+          >
+            {parsed.fileProfile.filePath}
           </div>
 
           {parsed.fileProfile.plainEnglishRole && (
-            <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '0.75rem 0.9rem' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#166534', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <span>💡</span> WHAT THIS FILE DOES:
+            <div
+              style={{
+                backgroundColor: '#E3FCEF',
+                border: '1px solid #ABF5D1',
+                borderLeft: '3px solid #36B37E',
+                borderRadius: '3px',
+                padding: '12px 14px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  color: '#006644',
+                  marginBottom: '4px',
+                }}
+              >
+                What this file does
               </div>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: '#14532d', lineHeight: 1.5 }}>
+              <p style={{ margin: 0, fontSize: '13px', color: '#172B4D', lineHeight: '20px' }}>
                 {parsed.fileProfile.plainEnglishRole}
               </p>
             </div>
           )}
 
           {/* Inbound Callers & Outbound Dependencies */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
             {parsed.fileProfile.callers.length > 0 && (
-              <div style={{ padding: '0.75rem', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
-                  📥 Inbound Callers ({parsed.fileProfile.callers.length}):
+              <div style={{ padding: '12px', borderRadius: '3px', backgroundColor: '#FAFBFC', border: '1px solid #DFE1E6' }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#172B4D', marginBottom: '6px' }}>
+                  Inbound Callers ({parsed.fileProfile.callers.length})
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {parsed.fileProfile.callers.map((c, i) => (
-                    <div key={i} style={{ fontSize: '0.78rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                      <span style={{ color: '#2563eb' }}>↳</span>
-                      <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{c}</span>
+                    <div key={i} style={{ fontSize: '12px', color: '#42526E', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ color: '#0052CC', fontWeight: 700 }}>↳</span>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 500, color: '#172B4D' }}>{c}</span>
                     </div>
                   ))}
                 </div>
@@ -513,15 +700,15 @@ function BriefingAnswerViewer({ answer, query, onNavigateFlow }: BriefingAnswerV
             )}
 
             {parsed.fileProfile.dependencies.length > 0 && (
-              <div style={{ padding: '0.75rem', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#334155', marginBottom: '0.4rem' }}>
-                  📤 Outbound Dependencies ({parsed.fileProfile.dependencies.length}):
+              <div style={{ padding: '12px', borderRadius: '3px', backgroundColor: '#FAFBFC', border: '1px solid #DFE1E6' }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#172B4D', marginBottom: '6px' }}>
+                  Outbound Dependencies ({parsed.fileProfile.dependencies.length})
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {parsed.fileProfile.dependencies.map((d, i) => (
-                    <div key={i} style={{ fontSize: '0.78rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                      <span style={{ color: '#16a34a' }}>↳</span>
-                      <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{d}</span>
+                    <div key={i} style={{ fontSize: '12px', color: '#42526E', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ color: '#006644', fontWeight: 700 }}>↳</span>
+                      <span style={{ fontFamily: 'monospace', fontWeight: 500, color: '#172B4D' }}>{d}</span>
                     </div>
                   ))}
                 </div>
@@ -531,148 +718,152 @@ function BriefingAnswerViewer({ answer, query, onNavigateFlow }: BriefingAnswerV
         </div>
       )}
 
-      {/* 3. Executive Architecture Overview */}
+      {/* ── 3. Executive Architecture Overview ── */}
       {parsed.executiveOverview && (
         <div
           style={{
-            padding: '1.25rem',
-            borderRadius: '10px',
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderLeft: '4px solid #2563eb',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+            padding: '14px 16px',
+            borderRadius: '3px',
+            backgroundColor: '#FAFBFC',
+            border: '1px solid #DFE1E6',
+            borderLeft: '3px solid #0052CC',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '1.1rem' }}>🏢</span>
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                color: '#0052CC',
+              }}
+            >
               Executive Architecture Overview
-            </h4>
+            </span>
           </div>
-          <p style={{ margin: 0, fontSize: '0.9rem', color: '#334155', lineHeight: 1.6 }}>
+          <p style={{ margin: 0, fontSize: '13px', color: '#42526E', lineHeight: '20px' }}>
             {renderInlineFormatting(parsed.executiveOverview)}
           </p>
         </div>
       )}
 
-      {/* 4. Step-by-Step Execution Journey (Interactive Cards) */}
+      {/* ── 4. Step-by-Step Execution Journey (Interactive Cards) ── */}
       {parsed.journeySteps.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div>
-            <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: '0 0 0.2rem' }}>
-              🎬 Step-by-Step Execution Journey (Client ➔ API ➔ Service ➔ Database)
+            <h4 style={{ fontSize: '15px', fontWeight: 600, color: '#172B4D', margin: '0 0 2px' }}>
+              Step-by-Step Execution Journey (Client → API → Service → Database)
             </h4>
-            <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: '#6B778C' }}>
               How user interactions flow across browser components, backend controllers, and database tables:
             </p>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {parsed.journeySteps.map((step) => {
-              const laneColor =
+              const laneLozengeAppearance =
                 step.lane === 'CLIENT'
-                  ? { bg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8', icon: '🖥️' }
+                  ? 'inprogress'
                   : step.lane === 'API'
-                  ? { bg: '#fef3c7', border: '#fde68a', text: '#92400e', icon: '⚡' }
+                  ? 'moved'
                   : step.lane === 'SERVICE'
-                  ? { bg: '#faf5ff', border: '#e9d5ff', text: '#7e22ce', icon: '⚙️' }
-                  : { bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d', icon: '🗄️' };
+                  ? 'new'
+                  : 'success';
 
               return (
                 <div
                   key={step.number}
                   style={{
                     display: 'flex',
-                    alignItems: 'stretch',
-                    gap: '0.85rem',
-                    padding: '0.9rem 1rem',
-                    borderRadius: '10px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                    alignItems: 'flex-start',
+                    gap: '12px',
+                    padding: '14px 16px',
+                    borderRadius: '3px',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #DFE1E6',
+                    boxShadow: '0 1px 1px rgba(9, 30, 66, 0.08)',
                   }}
                 >
                   {/* Step Number Circle */}
                   <div
                     style={{
-                      width: '32px',
-                      height: '32px',
+                      width: '24px',
+                      height: '24px',
                       borderRadius: '50%',
-                      backgroundColor: '#2563eb',
-                      color: '#ffffff',
+                      backgroundColor: '#0052CC',
+                      color: '#FFFFFF',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '0.85rem',
-                      fontWeight: 800,
+                      fontSize: '12px',
+                      fontWeight: 700,
                       flexShrink: 0,
+                      marginTop: '2px',
                     }}
                   >
                     {step.number}
                   </div>
 
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                    {/* Header: Title + Lane Badge + Repo */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.35rem' }}>
-                      <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {/* Header: Title + Lane Lozenge + Repo */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                      <span style={{ fontWeight: 600, fontSize: '14px', color: '#172B4D' }}>
                         {step.title}
                       </span>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Lozenge appearance={laneLozengeAppearance}>
+                          {step.lane}
+                        </Lozenge>
                         <span
                           style={{
-                            fontSize: '0.7rem',
-                            fontWeight: 700,
-                            padding: '0.12rem 0.45rem',
-                            borderRadius: '4px',
-                            backgroundColor: laneColor.bg,
-                            border: `1px solid ${laneColor.border}`,
-                            color: laneColor.text,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontSize: '11px',
+                            color: '#6B778C',
                           }}
                         >
-                          {laneColor.icon} {step.lane}
-                        </span>
-                        <span style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                          📁 {step.repo}
+                          <RepoBranchIcon />
+                          <span>{step.repo}</span>
                         </span>
                       </div>
                     </div>
 
                     {/* Component + Method + Network Call */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600, color: '#172B4D' }}>
                         {step.component}
                       </span>
                       {step.method && (
                         <>
-                          <span style={{ color: '#2563eb', fontWeight: 700, fontSize: '0.8rem' }}>➔</span>
+                          <span style={{ color: '#0052CC', fontWeight: 700, fontSize: '12px' }}>→</span>
                           <span
                             style={{
-                              fontFamily: 'monospace',
-                              fontWeight: 700,
-                              fontSize: '0.78rem',
-                              color: '#1d4ed8',
-                              backgroundColor: '#eff6ff',
-                              padding: '0.1rem 0.35rem',
-                              borderRadius: '4px',
-                              border: '1px solid #dbeafe',
+                              fontFamily: 'SFMono-Medium, "Segoe UI Mono", Menlo, Consolas, monospace',
+                              fontWeight: 600,
+                              fontSize: '12px',
+                              color: '#0052CC',
+                              backgroundColor: '#DEEBFF',
+                              padding: '2px 6px',
+                              borderRadius: '3px',
                             }}
                           >
-                            ƒ {step.method}
+                            {step.method}
                           </span>
                         </>
                       )}
                       {step.networkCall && (
                         <span
                           style={{
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            fontSize: '0.75rem',
-                            color: '#92400e',
-                            backgroundColor: '#fef3c7',
-                            padding: '0.1rem 0.35rem',
-                            borderRadius: '4px',
-                            border: '1px solid #fde68a',
+                            fontFamily: 'SFMono-Medium, "Segoe UI Mono", Menlo, Consolas, monospace',
+                            fontWeight: 600,
+                            fontSize: '11px',
+                            color: '#172B4D',
+                            backgroundColor: '#FFF0B3',
+                            padding: '2px 6px',
+                            borderRadius: '3px',
                           }}
                         >
                           {step.networkCall}
@@ -681,7 +872,7 @@ function BriefingAnswerViewer({ answer, query, onNavigateFlow }: BriefingAnswerV
                     </div>
 
                     {/* Action Description */}
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#475569', lineHeight: 1.5 }}>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#42526E', lineHeight: '20px' }}>
                       {step.action}
                     </p>
                   </div>
@@ -692,28 +883,29 @@ function BriefingAnswerViewer({ answer, query, onNavigateFlow }: BriefingAnswerV
         </div>
       )}
 
-      {/* 5. Consequences & Blast Radius Alert Box */}
+      {/* ── 5. Consequences & Blast Radius Alert Box (ADS Warning Flag) ── */}
       {parsed.consequences.length > 0 && (
         <div
           style={{
-            padding: '1.25rem',
-            borderRadius: '10px',
-            backgroundColor: '#fffbeb',
-            border: '1.5px solid #fde68a',
+            padding: '14px 16px',
+            borderRadius: '3px',
+            backgroundColor: '#FFFAE6',
+            border: '1px solid #FFE380',
+            borderLeft: '3px solid #FFAB00',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.45rem',
+            gap: '8px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span style={{ fontSize: '1.2rem' }}>💥</span>
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#92400e', margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertTriangleIcon />
+            <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#172B4D', margin: 0 }}>
               Consequences of Modifying (Blast Radius)
             </h4>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {parsed.consequences.map((c, i) => (
-              <div key={i} style={{ fontSize: '0.85rem', color: '#78350f', lineHeight: 1.5 }}>
+              <div key={i} style={{ fontSize: '13px', color: '#42526E', lineHeight: '20px' }}>
                 {renderInlineFormatting(c)}
               </div>
             ))}
@@ -721,28 +913,29 @@ function BriefingAnswerViewer({ answer, query, onNavigateFlow }: BriefingAnswerV
         </div>
       )}
 
-      {/* 6. Where to Start Guide (Onboarding) */}
+      {/* ── 6. Where to Start Guide (ADS Success Flag) ── */}
       {parsed.whereToStart.length > 0 && (
         <div
           style={{
-            padding: '1.25rem',
-            borderRadius: '10px',
-            backgroundColor: '#f0fdf4',
-            border: '1.5px solid #bbf7d0',
+            padding: '14px 16px',
+            borderRadius: '3px',
+            backgroundColor: '#E3FCEF',
+            border: '1px solid #ABF5D1',
+            borderLeft: '3px solid #36B37E',
             display: 'flex',
             flexDirection: 'column',
-            gap: '0.45rem',
+            gap: '8px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span style={{ fontSize: '1.2rem' }}>🚀</span>
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#166534', margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CompassIcon />
+            <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#006644', margin: 0 }}>
               Where to Start (New Developer Onboarding Guide)
             </h4>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {parsed.whereToStart.map((w, i) => (
-              <div key={i} style={{ fontSize: '0.85rem', color: '#14532d', lineHeight: 1.5 }}>
+              <div key={i} style={{ fontSize: '13px', color: '#172B4D', lineHeight: '20px' }}>
                 {renderInlineFormatting(w)}
               </div>
             ))}
@@ -750,46 +943,40 @@ function BriefingAnswerViewer({ answer, query, onNavigateFlow }: BriefingAnswerV
         </div>
       )}
 
-      {/* 7. Visual Call Tree Terminal */}
+      {/* ── 7. Visual Call Tree Terminal (Clean ADS Code Container) ── */}
       {parsed.callTree && (
         <div
           style={{
-            borderRadius: '10px',
+            borderRadius: '3px',
             overflow: 'hidden',
-            backgroundColor: '#0f172a',
-            border: '1px solid #1e293b',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            backgroundColor: '#091E42',
+            border: '1px solid #253858',
           }}
         >
           <div
             style={{
-              padding: '0.5rem 0.85rem',
-              backgroundColor: '#1e293b',
+              padding: '6px 12px',
+              backgroundColor: '#172B4D',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              borderBottom: '1px solid #334155',
+              borderBottom: '1px solid #253858',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#ef4444', display: 'inline-block' }} />
-              <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#f59e0b', display: 'inline-block' }} />
-              <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }} />
-              <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: '#94a3b8', marginLeft: '0.5rem' }}>
-                🌳 Call &amp; Method Hierarchy
-              </span>
-            </div>
-            <span style={{ fontSize: '0.7rem', color: '#64748b' }}>verified AST</span>
+            <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#DFE1E6', fontWeight: 600 }}>
+              Call &amp; Method Hierarchy
+            </span>
+            <span style={{ fontSize: '11px', color: '#8993A4' }}>verified AST</span>
           </div>
 
           <pre
             style={{
               margin: 0,
-              padding: '1rem',
-              fontFamily: 'Consolas, Monaco, "Courier New", monospace',
-              fontSize: '0.825rem',
+              padding: '12px 16px',
+              fontFamily: 'SFMono-Medium, "Segoe UI Mono", Menlo, Consolas, monospace',
+              fontSize: '12px',
               lineHeight: 1.6,
-              color: '#38bdf8',
+              color: '#4C9AFF',
               overflowX: 'auto',
               whiteSpace: 'pre-wrap',
             }}
@@ -799,34 +986,33 @@ function BriefingAnswerViewer({ answer, query, onNavigateFlow }: BriefingAnswerV
         </div>
       )}
 
-      {/* 8. Friendly Dependencies */}
+      {/* ── 8. Friendly Dependencies ── */}
       {parsed.friendlyDeps.length > 0 && (
         <div
           style={{
-            padding: '1.25rem',
-            borderRadius: '10px',
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
+            padding: '14px 16px',
+            borderRadius: '3px',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #DFE1E6',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem' }}>
-            <span style={{ fontSize: '1.1rem' }}>📋</span>
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#172B4D', margin: 0 }}>
               Friendly File Dependencies ({parsed.friendlyDeps.length})
             </h4>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {parsed.friendlyDeps.map((dep, idx) => (
               <div
                 key={idx}
                 style={{
-                  fontSize: '0.82rem',
-                  padding: '0.45rem 0.75rem',
-                  borderRadius: '6px',
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  color: '#334155',
-                  lineHeight: 1.45,
+                  fontSize: '13px',
+                  padding: '6px 10px',
+                  borderRadius: '3px',
+                  backgroundColor: '#FAFBFC',
+                  border: '1px solid #DFE1E6',
+                  color: '#42526E',
+                  lineHeight: '18px',
                 }}
               >
                 {renderInlineFormatting(dep)}
@@ -836,28 +1022,28 @@ function BriefingAnswerViewer({ answer, query, onNavigateFlow }: BriefingAnswerV
         </div>
       )}
 
-      {/* 9. Persistence & Queues metadata pills */}
+      {/* ── 9. Persistence & Queues metadata pills ── */}
       {(parsed.persistenceInfo || parsed.eventingInfo) && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {parsed.persistenceInfo && (
-            <div style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', borderRadius: '6px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534' }}>
-              <strong>🗄️ Database Entities:</strong> {parsed.persistenceInfo}
-            </div>
+            <Lozenge appearance="success">
+              Database: {parsed.persistenceInfo}
+            </Lozenge>
           )}
           {parsed.eventingInfo && (
-            <div style={{ fontSize: '0.8rem', padding: '0.4rem 0.75rem', borderRadius: '6px', backgroundColor: '#faf5ff', border: '1px solid #e9d5ff', color: '#7e22ce' }}>
-              <strong>📬 Message Queues:</strong> {parsed.eventingInfo}
-            </div>
+            <Lozenge appearance="new">
+              Queue: {parsed.eventingInfo}
+            </Lozenge>
           )}
         </div>
       )}
 
-      {/* 10. Generic fallback sections */}
+      {/* ── 10. Generic fallback sections ── */}
       {parsed.genericSections.map((sec, sIdx) => {
         const text = sec.content.join('\n').trim();
         if (!text) return null;
         return (
-          <div key={sIdx} style={{ fontSize: '0.9rem', lineHeight: 1.6, color: '#334155' }}>
+          <div key={sIdx} style={{ fontSize: '13px', lineHeight: '20px', color: '#42526E' }}>
             {renderInlineFormatting(text)}
           </div>
         );
@@ -957,8 +1143,8 @@ export function AskRepoDoctorDrawer({
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.45)',
-        backdropFilter: 'blur(3px)',
+        backgroundColor: 'rgba(9, 30, 66, 0.54)',
+        backdropFilter: 'blur(2px)',
         zIndex: 1000,
         display: 'flex',
         justifyContent: 'flex-end',
@@ -969,121 +1155,148 @@ export function AskRepoDoctorDrawer({
         className="drawer-panel"
         style={{
           width: '100%',
-          maxWidth: '840px',
+          maxWidth: '860px',
           height: '100vh',
-          backgroundColor: '#ffffff',
-          boxShadow: '-4px 0 24px rgba(0, 0, 0, 0.12)',
+          backgroundColor: '#FFFFFF',
+          boxShadow: '-8px 0 32px rgba(9, 30, 66, 0.16)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          animation: 'slideInRight 0.25s ease-out',
+          animation: 'slideInRight 0.2s cubic-bezier(0, 0, 0.2, 1)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── 1. Drawer Header ── */}
+        {/* ── 1. Drawer Header (ADS Standard) ── */}
         <div
           style={{
-            padding: '1.25rem 1.75rem',
-            borderBottom: '1px solid var(--border-subtle, #e2e8f0)',
+            padding: '16px 24px',
+            borderBottom: '1px solid #DFE1E6',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: '#ffffff',
+            backgroundColor: '#FFFFFF',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '8px',
-                backgroundColor: 'var(--brand-primary, #2563eb)',
-                color: '#ffffff',
+                width: '32px',
+                height: '32px',
+                borderRadius: '3px',
+                backgroundColor: '#0052CC',
+                color: '#FFFFFF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '1.2rem',
-                fontWeight: 700,
+                flexShrink: 0,
               }}
             >
-              💬
+              <ChatSparkleIcon />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary, #0f172a)', margin: 0 }}>
+              <h2
+                style={{
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  color: '#172B4D',
+                  margin: 0,
+                  lineHeight: '24px',
+                }}
+              >
                 Ask RepoDoctor
               </h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary, #64748b)', margin: 0 }}>
+              <p
+                style={{
+                  fontSize: '12px',
+                  color: '#6B778C',
+                  margin: 0,
+                  lineHeight: '16px',
+                }}
+              >
                 Explain features, visual flows, and dependencies backed strictly by source code evidence
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            className="secondary-btn"
+          <Button
+            appearance="subtle"
+            spacing="compact"
             onClick={onClose}
             aria-label="Close Ask Drawer"
-            style={{ padding: '0.4rem 0.75rem', fontSize: '1rem', lineHeight: 1 }}
+            style={{ color: '#42526E', padding: '4px' }}
           >
-            ✕
-          </button>
+            <CloseIcon />
+          </Button>
         </div>
 
-        {/* ── 2. Large Question Composer Section ── */}
+        {/* ── 2. Question Composer Section (ADS Standard) ── */}
         <div
           style={{
-            padding: '1.25rem 1.75rem',
-            backgroundColor: '#f8fafc',
-            borderBottom: '1px solid #e2e8f0',
+            padding: '16px 24px',
+            backgroundColor: '#FAFBFC',
+            borderBottom: '1px solid #DFE1E6',
           }}
         >
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={{ position: 'relative', width: '100%' }}>
               <input
                 type="text"
                 data-testid="ask-question-input"
-                className="input-field"
                 placeholder="Ask how something works, blast radius, or cross-repo flows..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '0.9rem 6rem 0.9rem 1.1rem',
-                  fontSize: '1rem',
-                  borderRadius: '10px',
-                  border: '1.5px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                  padding: '8px 80px 8px 12px',
+                  height: '36px',
+                  fontSize: '13px',
+                  borderRadius: '3px',
+                  border: '1px solid #DFE1E6',
+                  backgroundColor: '#FFFFFF',
+                  color: '#172B4D',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  fontFamily:
+                    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+                  transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = '#4C9AFF';
+                  e.currentTarget.style.boxShadow = '0 0 0 1px #4C9AFF';
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = '#DFE1E6';
+                  e.currentTarget.style.boxShadow = 'none';
                 }}
               />
-              <button
-                type="submit"
-                data-testid="ask-question-btn"
-                className="primary-btn"
-                disabled={isLoading || !query.trim()}
-                style={{
-                  position: 'absolute',
-                  right: '6px',
-                  top: '6px',
-                  bottom: '6px',
-                  padding: '0 1.25rem',
-                  borderRadius: '8px',
-                  fontSize: '0.9rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                }}
-              >
-                {isLoading ? 'Analyzing...' : 'Ask'}
-              </button>
+              <div style={{ position: 'absolute', right: '4px', top: '2px', bottom: '2px', display: 'flex', alignItems: 'center' }}>
+                <Button
+                  type="submit"
+                  data-testid="ask-question-btn"
+                  appearance="primary"
+                  spacing="compact"
+                  disabled={isLoading || !query.trim()}
+                  style={{ height: '30px' }}
+                >
+                  {isLoading ? 'Analyzing...' : 'Ask'}
+                </Button>
+              </div>
             </div>
 
-            {/* Starter Suggestion Chips */}
+            {/* Starter Suggestion Chips (ADS Tags) */}
             <div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.4rem' }}>
+              <div
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  color: '#6B778C',
+                  marginBottom: '6px',
+                }}
+              >
                 SUGGESTED QUESTIONS:
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {STARTER_QUESTIONS.map((sq) => (
                   <button
                     key={sq}
@@ -1093,15 +1306,23 @@ export function AskRepoDoctorDrawer({
                       void handleExecuteQuery(sq);
                     }}
                     style={{
-                      padding: '0.3rem 0.7rem',
-                      fontSize: '0.75rem',
-                      borderRadius: '9999px',
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      color: '#334155',
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      borderRadius: '3px',
+                      backgroundColor: 'rgba(9, 30, 66, 0.04)',
+                      border: '1px solid #DFE1E6',
+                      color: '#0052CC',
                       cursor: 'pointer',
                       textAlign: 'left',
-                      lineHeight: 1.3,
+                      lineHeight: '16px',
+                      transition: 'background-color 0.1s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(9, 30, 66, 0.08)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(9, 30, 66, 0.04)';
                     }}
                   >
                     {sq}
@@ -1117,19 +1338,29 @@ export function AskRepoDoctorDrawer({
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '1.75rem',
+            padding: '20px 24px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '1.5rem',
+            gap: '16px',
           }}
         >
           {isLoading && (
-            <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1rem', animation: 'spin 1.5s linear infinite' }}>⚙️</div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.4rem' }}>
+            <div style={{ textAlign: 'center', padding: '48px 16px' }}>
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  margin: '0 auto 16px',
+                  borderRadius: '50%',
+                  border: '3px solid #DFE1E6',
+                  borderTopColor: '#0052CC',
+                  animation: 'spin 0.8s linear infinite',
+                }}
+              />
+              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#172B4D', margin: '0 0 6px' }}>
                 Analyzing System Architecture...
               </h3>
-              <p style={{ fontSize: '0.9rem', color: '#64748b', margin: 0, maxWidth: '420px', marginInline: 'auto' }}>
+              <p style={{ fontSize: '13px', color: '#6B778C', margin: 0, maxWidth: '440px', marginInline: 'auto', lineHeight: '20px' }}>
                 Tracing component calls, database operations, and evidence citations across repositories without hallucinations.
               </p>
             </div>
@@ -1137,174 +1368,130 @@ export function AskRepoDoctorDrawer({
 
           {error && (
             <div
-              className="card-section"
               style={{
-                border: '1px solid #fecaca',
-                backgroundColor: '#fef2f2',
-                borderRadius: '10px',
-                padding: '1.25rem',
-                margin: 0,
+                border: '1px solid #FFBDAD',
+                borderLeft: '3px solid #DE350B',
+                backgroundColor: '#FFEBE6',
+                borderRadius: '3px',
+                padding: '14px 16px',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-                <span style={{ fontSize: '1.1rem' }}>⚠️</span>
-                <h4 style={{ margin: 0, fontWeight: 700, color: '#991b1b', fontSize: '0.95rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                <h4 style={{ margin: 0, fontWeight: 600, color: '#BF2600', fontSize: '14px' }}>
                   Unable to Answer Question
                 </h4>
               </div>
-              <p style={{ margin: '0 0 0.85rem', fontSize: '0.9rem', color: '#b91c1c', lineHeight: 1.5 }}>
+              <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#BF2600', lineHeight: '20px' }}>
                 {error}
               </p>
-              <button
-                type="button"
-                className="secondary-btn"
+              <Button
+                appearance="default"
+                spacing="compact"
                 onClick={() => void handleExecuteQuery(query)}
-                style={{
-                  fontSize: '0.8rem',
-                  padding: '0.35rem 0.85rem',
-                  borderColor: '#fca5a5',
-                  color: '#991b1b',
-                  backgroundColor: '#ffffff',
-                }}
               >
                 ↻ Try Again
-              </button>
+              </Button>
             </div>
           )}
 
           {!isLoading && !response && !error && (
-            <div style={{ textAlign: 'center', padding: '4rem 1rem', color: '#64748b' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🧭</div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.5rem' }}>
-                Ask Anything About This Project
-              </h3>
-              <p style={{ fontSize: '0.95rem', maxWidth: '460px', margin: '0 auto', lineHeight: 1.6 }}>
-                RepoDoctor correlates route handlers, business services, database operations, and message queues to explain how functionality actually flows through code.
-              </p>
+            <div style={{ padding: '32px 16px' }}>
+              <EmptyState
+                header="Ask Anything About This Project"
+                description="RepoDoctor correlates route handlers, business services, database operations, and message queues to explain how functionality actually flows through code."
+              />
             </div>
           )}
 
           {!isLoading && response && (
-            <div data-testid="ask-response-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {/* ── Answer Card ── */}
+            <div data-testid="ask-response-container" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* ── Status Bar & Action ── */}
               <div
                 style={{
-                  padding: '1.5rem',
-                  borderRadius: '12px',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 12px',
+                  backgroundColor: '#FAFBFC',
+                  border: '1px solid #DFE1E6',
+                  borderRadius: '3px',
+                  flexWrap: 'wrap',
+                  gap: '8px',
                 }}
               >
-                {/* Top Status Pill: Honest Grounding, NO 100% Badges */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span
-                      style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        padding: '0.2rem 0.6rem',
-                        borderRadius: '9999px',
-                        backgroundColor: response.isInferred ? '#fef3c7' : '#dcfce7',
-                        color: response.isInferred ? '#92400e' : '#166534',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                      }}
-                    >
-                      <span>{response.isInferred ? 'ℹ' : '✓'}</span>
-                      <span>{response.isInferred ? 'Inferred Flow' : 'Verified Static Evidence'}</span>
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Lozenge appearance={response.isInferred ? 'moved' : 'success'} isBold>
+                    {response.isInferred ? 'Inferred Flow' : 'Verified Static Evidence'}
+                  </Lozenge>
 
-                    <span style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                      ({response.participatingComponents.length} components, {response.citations.length} code citations)
-                    </span>
-                  </div>
-
-                  {/* One-Click "View Flow" Action */}
-                  {response.flowSteps.length > 0 && onNavigateFlow && (
-                    <button
-                      type="button"
-                      className="primary-btn"
-                      onClick={handleViewFlow}
-                      style={{
-                        fontSize: '0.8rem',
-                        padding: '0.35rem 0.85rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.35rem',
-                      }}
-                    >
-                      <span>🕸️</span>
-                      <span>View Flow in Architecture</span>
-                    </button>
-                  )}
+                  <span style={{ fontSize: '12px', color: '#6B778C' }}>
+                    ({response.participatingComponents.length} components, {response.citations.length} code citations)
+                  </span>
                 </div>
 
-                {/* User-Friendly Structured Briefing Viewer */}
-                <BriefingAnswerViewer
-                  answer={response.answer}
-                  query={query}
-                  onNavigateFlow={handleViewFlow}
-                />
+                {/* One-Click "View Flow" Action (ADS Button) */}
+                {response.flowSteps.length > 0 && onNavigateFlow && (
+                  <Button appearance="primary" spacing="compact" onClick={handleViewFlow}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <GraphFlowIcon />
+                      <span>View Flow in Architecture</span>
+                    </span>
+                  </Button>
+                )}
               </div>
+
+              {/* ── Structured Senior Briefing Viewer ── */}
+              <BriefingAnswerViewer
+                answer={response.answer}
+                query={query}
+                onNavigateFlow={handleViewFlow}
+              />
 
               {/* ── Step-by-Step Flow Timeline (fallback if not in briefing) ── */}
               {response.flowSteps.length > 0 && !response.answer.includes('Step-by-Step Execution Journey') && (
                 <div
                   style={{
-                    padding: '1.25rem',
-                    borderRadius: '12px',
-                    backgroundColor: '#f8fafc',
-                    border: '1px solid #e2e8f0',
+                    padding: '16px',
+                    borderRadius: '3px',
+                    backgroundColor: '#FAFBFC',
+                    border: '1px solid #DFE1E6',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <h3 style={{ fontSize: '15px', fontWeight: 600, color: '#172B4D', margin: 0 }}>
                       Step-by-Step Execution Flow
                     </h3>
                     {onNavigateFlow && (
-                      <button
-                        type="button"
-                        onClick={handleViewFlow}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#2563eb',
-                          fontSize: '0.85rem',
-                          fontWeight: 600,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Open interactive diagram ➔
-                      </button>
+                      <Button appearance="subtle" spacing="compact" onClick={handleViewFlow} style={{ color: '#0052CC' }}>
+                        <span>Open interactive diagram →</span>
+                      </Button>
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {response.flowSteps.map((step: FlowStepDto) => (
                       <div
                         key={step.stepNumber}
                         style={{
                           display: 'flex',
-                          gap: '0.85rem',
-                          padding: '0.85rem 1rem',
-                          borderRadius: '8px',
-                          border: '1px solid #e2e8f0',
-                          backgroundColor: '#ffffff',
+                          gap: '12px',
+                          padding: '12px 14px',
+                          borderRadius: '3px',
+                          border: '1px solid #DFE1E6',
+                          backgroundColor: '#FFFFFF',
                         }}
                       >
                         <div
                           style={{
-                            width: '28px',
-                            height: '28px',
+                            width: '24px',
+                            height: '24px',
                             borderRadius: '50%',
-                            backgroundColor: '#2563eb',
-                            color: '#ffffff',
+                            backgroundColor: '#0052CC',
+                            color: '#FFFFFF',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '0.8rem',
+                            fontSize: '12px',
                             fontWeight: 700,
                             flexShrink: 0,
                           }}
@@ -1312,81 +1499,62 @@ export function AskRepoDoctorDrawer({
                           {step.stepNumber}
                         </div>
                         <div style={{ flex: 1 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
-                            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                            <span style={{ fontWeight: 600, fontSize: '13px', color: '#172B4D' }}>
                               {step.componentName}
                             </span>
                             {step.methodName && (
                               <>
-                                <span style={{ color: '#2563eb', fontWeight: 700 }}>➔</span>
+                                <span style={{ color: '#0052CC', fontWeight: 700, fontSize: '12px' }}>→</span>
                                 <span
                                   style={{
-                                    fontFamily: 'monospace',
-                                    fontWeight: 700,
-                                    fontSize: '0.8rem',
-                                    color: '#1d4ed8',
-                                    backgroundColor: '#eff6ff',
-                                    padding: '0.1rem 0.35rem',
-                                    borderRadius: '4px',
-                                    border: '1px solid #dbeafe',
+                                    fontFamily: 'SFMono-Medium, "Segoe UI Mono", Menlo, Consolas, monospace',
+                                    fontWeight: 600,
+                                    fontSize: '12px',
+                                    color: '#0052CC',
+                                    backgroundColor: '#DEEBFF',
+                                    padding: '2px 6px',
+                                    borderRadius: '3px',
                                   }}
                                 >
                                   {step.methodName}
                                 </span>
                               </>
                             )}
-                            <span
-                              style={{
-                                fontSize: '0.7rem',
-                                padding: '0.1rem 0.4rem',
-                                borderRadius: '4px',
-                                backgroundColor: '#e2e8f0',
-                                color: '#334155',
-                                fontWeight: 600,
-                              }}
-                            >
+                            <Lozenge appearance="default">
                               {step.componentType}
-                            </span>
+                            </Lozenge>
                             <span
                               style={{
-                                fontSize: '0.7rem',
-                                padding: '0.1rem 0.4rem',
-                                borderRadius: '4px',
-                                backgroundColor: '#dbeafe',
-                                color: '#1e40af',
-                                fontWeight: 600,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontSize: '11px',
+                                color: '#6B778C',
                               }}
                             >
-                              📁 {step.repositoryName}
+                              <RepoBranchIcon />
+                              <span>{step.repositoryName}</span>
                             </span>
                             {step.edgeType && (
-                              <span
-                                style={{
-                                  fontSize: '0.7rem',
-                                  padding: '0.1rem 0.4rem',
-                                  borderRadius: '4px',
-                                  backgroundColor: '#fef3c7',
-                                  color: '#92400e',
-                                  fontWeight: 600,
-                                }}
-                              >
+                              <Lozenge appearance="moved">
                                 {step.edgeType}
-                              </span>
+                              </Lozenge>
                             )}
                           </div>
-                          <p style={{ margin: 0, fontSize: '0.875rem', color: '#475569', lineHeight: 1.5 }}>
+                          <p style={{ margin: 0, fontSize: '13px', color: '#42526E', lineHeight: '20px' }}>
                             {step.description}
                           </p>
                           {step.targetName && (
-                            <div style={{ marginTop: '0.35rem', fontSize: '0.8rem', color: '#2563eb', fontWeight: 600 }}>
+                            <div style={{ marginTop: '6px', fontSize: '12px', color: '#0052CC', fontWeight: 600 }}>
                               ↳ Connects to: {step.targetName}
                               {step.targetMethodName && (
-                                <span style={{ fontFamily: 'monospace', marginLeft: '0.3rem', color: '#1d4ed8' }}>
-                                  ➔ {step.targetMethodName}
+                                <span style={{ fontFamily: 'monospace', marginLeft: '4px', color: '#0052CC' }}>
+                                  → {step.targetMethodName}
                                 </span>
                               )}
                               {step.targetRepositoryName && step.targetRepositoryName !== step.repositoryName && (
-                                <span style={{ marginLeft: '0.4rem', color: '#b45309' }}>
+                                <span style={{ marginLeft: '6px', color: '#FFAB00' }}>
                                   [Cross-Repo: {step.targetRepositoryName}]
                                 </span>
                               )}
@@ -1401,10 +1569,19 @@ export function AskRepoDoctorDrawer({
 
               {/* ── Contextual Follow-Up Suggestions ── */}
               <div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', marginBottom: '0.5rem' }}>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    color: '#6B778C',
+                    marginBottom: '6px',
+                  }}
+                >
                   FOLLOW-UP QUESTIONS:
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {getFollowUpSuggestions(response).map((fq, idx) => (
                     <button
                       key={idx}
@@ -1414,33 +1591,43 @@ export function AskRepoDoctorDrawer({
                         void handleExecuteQuery(fq);
                       }}
                       style={{
-                        padding: '0.6rem 0.9rem',
-                        fontSize: '0.85rem',
-                        borderRadius: '8px',
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #cbd5e1',
-                        color: '#1d4ed8',
+                        padding: '8px 12px',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        borderRadius: '3px',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #DFE1E6',
+                        color: '#0052CC',
                         cursor: 'pointer',
                         textAlign: 'left',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
+                        transition: 'background-color 0.1s ease, border-color 0.1s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#FAFBFC';
+                        e.currentTarget.style.borderColor = '#4C9AFF';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#FFFFFF';
+                        e.currentTarget.style.borderColor = '#DFE1E6';
                       }}
                     >
-                      <span>💬 {fq}</span>
-                      <span style={{ fontSize: '0.8rem', color: '#64748b' }}>➔</span>
+                      <span>{fq}</span>
+                      <span style={{ fontSize: '12px', color: '#6B778C' }}>→</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* ── Expandable "Why This Answer?" Evidence Section ── */}
+              {/* ── Expandable Supporting Code Evidence Section ── */}
               <div
                 style={{
-                  borderRadius: '10px',
-                  border: '1px solid #e2e8f0',
-                  backgroundColor: '#ffffff',
-                  padding: '1rem',
+                  borderRadius: '3px',
+                  border: '1px solid #DFE1E6',
+                  backgroundColor: '#FFFFFF',
+                  overflow: 'hidden',
                 }}
               >
                 <div
@@ -1448,24 +1635,36 @@ export function AskRepoDoctorDrawer({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
+                    padding: '10px 14px',
                     cursor: 'pointer',
+                    backgroundColor: showEvidenceDetails ? '#FAFBFC' : '#FFFFFF',
+                    transition: 'background-color 0.1s ease',
                   }}
                   onClick={() => setShowEvidenceDetails(!showEvidenceDetails)}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1rem' }}>🔍</span>
-                    <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1e293b' }}>
-                      Why this answer? Supporting Code Evidence ({response.citations.length})
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: '#172B4D' }}>
+                      Supporting Code Evidence
                     </span>
+                    <Badge appearance="default">{response.citations.length}</Badge>
                   </div>
-                  <span style={{ fontSize: '0.85rem', color: '#64748b' }}>
-                    {showEvidenceDetails ? 'Hide ▴' : 'Inspect Evidence ▾'}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#6B778C', fontSize: '12px' }}>
+                    <span>{showEvidenceDetails ? 'Hide' : 'Inspect Evidence'}</span>
+                    <ChevronDownIcon isExpanded={showEvidenceDetails} />
+                  </div>
                 </div>
 
                 {showEvidenceDetails && (
-                  <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                    <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
+                  <div
+                    style={{
+                      padding: '14px',
+                      borderTop: '1px solid #DFE1E6',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px',
+                    }}
+                  >
+                    <p style={{ margin: 0, fontSize: '12px', color: '#6B778C', lineHeight: '18px' }}>
                       This explanation is synthesized directly from verified AST declarations, route decorators, and dependency citations across {response.participatingRepositories.length} repository(s). No speculative code was synthesized.
                     </p>
 
@@ -1475,27 +1674,34 @@ export function AskRepoDoctorDrawer({
                         <div
                           key={idx}
                           style={{
-                            borderRadius: '8px',
-                            border: '1px solid #e2e8f0',
-                            backgroundColor: '#f8fafc',
+                            borderRadius: '3px',
+                            border: '1px solid #DFE1E6',
+                            backgroundColor: '#FAFBFC',
                             overflow: 'hidden',
                           }}
                         >
                           <div
                             style={{
-                              padding: '0.65rem 0.85rem',
+                              padding: '8px 12px',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'space-between',
                               cursor: 'pointer',
-                              backgroundColor: isExpanded ? '#f1f5f9' : '#f8fafc',
+                              backgroundColor: isExpanded ? '#F4F5F7' : '#FAFBFC',
                             }}
                             onClick={() => setExpandedCitationIndex(isExpanded ? null : idx)}
                           >
-                            <span style={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 600, color: '#2563eb' }}>
-                              📄 {cite.filePath}:{cite.lineStart}-{cite.lineEnd}
+                            <span
+                              style={{
+                                fontFamily: 'SFMono-Medium, "Segoe UI Mono", Menlo, Consolas, monospace',
+                                fontSize: '12px',
+                                fontWeight: 600,
+                                color: '#0052CC',
+                              }}
+                            >
+                              {cite.filePath}:{cite.lineStart}-{cite.lineEnd}
                             </span>
-                            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            <span style={{ fontSize: '11px', color: '#6B778C' }}>
                               {isExpanded ? 'Collapse' : 'View Code'}
                             </span>
                           </div>
@@ -1504,14 +1710,14 @@ export function AskRepoDoctorDrawer({
                             <pre
                               style={{
                                 margin: 0,
-                                padding: '0.75rem',
-                                backgroundColor: '#ffffff',
-                                borderTop: '1px solid #e2e8f0',
-                                fontFamily: 'monospace',
-                                fontSize: '0.8rem',
+                                padding: '10px 12px',
+                                backgroundColor: '#FFFFFF',
+                                borderTop: '1px solid #DFE1E6',
+                                fontFamily: 'SFMono-Medium, "Segoe UI Mono", Menlo, Consolas, monospace',
+                                fontSize: '12px',
                                 overflowX: 'auto',
-                                color: '#334155',
-                                lineHeight: 1.5,
+                                color: '#172B4D',
+                                lineHeight: '18px',
                               }}
                             >
                               {cite.codeSnippet}
@@ -1523,11 +1729,19 @@ export function AskRepoDoctorDrawer({
 
                     {/* Documented Limitations */}
                     {response.limitations.length > 0 && (
-                      <div style={{ padding: '0.75rem', borderRadius: '6px', backgroundColor: '#fffbeb', border: '1px solid #fef3c7' }}>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#92400e', marginBottom: '0.25rem' }}>
+                      <div
+                        style={{
+                          padding: '10px 12px',
+                          borderRadius: '3px',
+                          backgroundColor: '#FFFAE6',
+                          border: '1px solid #FFE380',
+                          borderLeft: '3px solid #FFAB00',
+                        }}
+                      >
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#172B4D', marginBottom: '4px' }}>
                           Analysis Limitations:
                         </div>
-                        <ul style={{ margin: 0, paddingLeft: '1.25rem', fontSize: '0.75rem', color: '#b45309' }}>
+                        <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '12px', color: '#42526E', lineHeight: '18px' }}>
                           {response.limitations.map((lim, lIdx) => (
                             <li key={lIdx}>{lim}</li>
                           ))}

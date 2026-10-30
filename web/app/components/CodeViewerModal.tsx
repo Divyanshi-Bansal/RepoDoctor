@@ -107,8 +107,8 @@ export function ${currentNode.primaryMethod || 'Component'}() {
       <div
         style={{
           backgroundColor: '#ffffff',
-          borderRadius: '12px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          borderRadius: '3px',
+          boxShadow: '0 8px 16px -4px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31)',
           width: '95vw',
           maxWidth: '1280px',
           height: '86vh',

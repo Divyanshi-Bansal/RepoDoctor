@@ -162,9 +162,9 @@ export function ManageProjectReposModal({
       <div
         style={{
           backgroundColor: '#ffffff',
-          borderRadius: '12px',
+          borderRadius: '3px',
           border: '1px solid var(--border-default)',
-          boxShadow: 'var(--shadow-lg)',
+          boxShadow: '0 8px 16px -4px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31)',
           maxWidth: '740px',
           width: '100%',
           maxHeight: '90vh',

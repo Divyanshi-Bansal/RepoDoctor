@@ -37,12 +37,12 @@ export default function ProfilePage(): React.JSX.Element {
             createdAt: meData.createdAt || new Date().toISOString(),
           });
         } else {
-          // Unauthenticated -> redirect to main landing
-          window.location.href = '/';
+          // Unauthenticated -> redirect to login
+          window.location.href = '/login';
         }
       }
     } catch {
-      window.location.href = '/';
+      window.location.href = '/login';
     } finally {
       setIsLoading(false);
     }

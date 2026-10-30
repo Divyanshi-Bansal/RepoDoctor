@@ -89,12 +89,12 @@ export function FeatureKTModal({
           maxWidth: '960px',
           maxHeight: '90vh',
           backgroundColor: '#ffffff',
-          borderRadius: '14px',
-          boxShadow: '0 20px 45px -10px rgba(0, 0, 0, 0.25)',
+          borderRadius: '3px',
+          boxShadow: '0 8px 16px -4px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          border: '1px solid #cbd5e1',
+          border: '1px solid var(--border-default)',
         }}
       >
         {/* ── Modal Header ── */}

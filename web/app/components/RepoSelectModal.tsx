@@ -76,9 +76,9 @@ export function RepoSelectModal({
       <div
         style={{
           backgroundColor: '#ffffff',
-          borderRadius: '12px',
+          borderRadius: '3px',
           border: '1px solid var(--border-default)',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 8px 16px -4px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31)',
           maxWidth: '640px',
           width: '100%',
           maxHeight: '85vh',

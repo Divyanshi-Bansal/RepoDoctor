@@ -14,7 +14,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "plugins": [{ "name": "next" }],
     "paths": {
-      "@repo-doctor/shared": ["../packages/shared/dist/index.d.ts"],
+      "@repo-doctor/shared": ["../packages/shared/src/index.ts"],
       "@/*": ["./src/*"]
     }
   },

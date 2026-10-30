@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import type { AuthUserInfo } from './Header';
+import { Avatar } from './atlassian/Avatar';
+import { Lozenge } from './atlassian/Lozenge';
 
 interface UserDropdownProps {
   readonly user: AuthUserInfo;
@@ -30,7 +32,7 @@ export function UserDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close when clicking outside
+  // Close when clicking outside or pressing Escape
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -63,79 +65,132 @@ export function UserDropdown({
     >
       <button
         type="button"
-        className="avatar-btn"
         data-testid="user-avatar-button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="menu"
         title={`Account: ${displayName}`}
+        style={{
+          background: 'none',
+          border: 'none',
+          padding: 0,
+          cursor: 'pointer',
+          borderRadius: '50%',
+          outline: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       >
-        <span>{initials}</span>
+        <Avatar name={displayName} initials={initials} size="medium" />
       </button>
 
       {isOpen && (
         <div
-          className="user-dropdown-menu"
           role="menu"
           data-testid="user-dropdown-menu"
           aria-label="User account menu"
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 8px)',
+            right: 0,
+            width: '280px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #dfe1e6',
+            borderRadius: '3px',
+            boxShadow: '0 4px 8px -2px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.31)',
+            padding: '8px 0',
+            zIndex: 100,
+            fontFamily:
+              '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+          }}
         >
           {/* User Identity Header */}
-          <div className="dropdown-user-info">
-            <div className="dropdown-user-name" data-testid="dropdown-user-name">
+          <div
+            style={{
+              padding: '10px 16px',
+              borderBottom: '1px solid #dfe1e6',
+            }}
+          >
+            <div
+              data-testid="dropdown-user-name"
+              style={{
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#172b4d',
+                lineHeight: 1.3,
+              }}
+            >
               {displayName}
             </div>
             {user.email && (
-              <div className="dropdown-user-email" data-testid="dropdown-user-email">
+              <div
+                data-testid="dropdown-user-email"
+                style={{
+                  fontSize: '12px',
+                  color: '#6b778c',
+                  wordBreak: 'break-all',
+                  marginTop: '2px',
+                }}
+              >
                 {user.email}
               </div>
             )}
 
             {/* Provider Status Indicators */}
-            <div className="dropdown-status-row">
-              <div className="dropdown-status-pill">
-                <span
-                  style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    backgroundColor: user.githubUsername ? 'var(--accent-green)' : 'var(--border-muted)',
-                  }}
-                />
-                <span>
-                  GitHub:{' '}
-                  {user.githubUsername ? (
-                    <strong style={{ color: 'var(--text-primary)' }}>@{user.githubUsername}</strong>
-                  ) : (
-                    <span style={{ color: 'var(--text-muted)' }}>Disconnected</span>
-                  )}
-                </span>
+            <div
+              style={{
+                marginTop: '10px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  fontSize: '12px',
+                  color: '#42526e',
+                }}
+              >
+                <span>GitHub:</span>
+                {user.githubUsername ? (
+                  <Lozenge appearance="success">@{user.githubUsername}</Lozenge>
+                ) : (
+                  <Lozenge appearance="default">DISCONNECTED</Lozenge>
+                )}
               </div>
 
-              <div className="dropdown-status-pill">
-                <span
-                  style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    backgroundColor: user.gitlabUsername ? 'var(--accent-purple)' : 'var(--border-muted)',
-                  }}
-                />
-                <span>
-                  GitLab:{' '}
-                  {user.gitlabUsername ? (
-                    <strong style={{ color: 'var(--text-primary)' }}>@{user.gitlabUsername}</strong>
-                  ) : (
-                    <span style={{ color: 'var(--text-muted)' }}>Disconnected</span>
-                  )}
-                </span>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  fontSize: '12px',
+                  color: '#42526e',
+                }}
+              >
+                <span>GitLab:</span>
+                {user.gitlabUsername ? (
+                  <Lozenge appearance="inprogress">@{user.gitlabUsername}</Lozenge>
+                ) : (
+                  <Lozenge appearance="default">DISCONNECTED</Lozenge>
+                )}
               </div>
             </div>
           </div>
 
           {/* Quick Provider Connect (if disconnected) */}
           {(!user.githubUsername || !user.gitlabUsername) && (
-            <div style={{ padding: '0.4rem 1.25rem', backgroundColor: '#f8fafc', borderBottom: '1px solid var(--border-default)' }}>
+            <div
+              style={{
+                padding: '6px 16px',
+                backgroundColor: '#fafbfc',
+                borderBottom: '1px solid #dfe1e6',
+              }}
+            >
               {!user.githubUsername && onConnectGitHub && (
                 <button
                   type="button"
@@ -148,11 +203,11 @@ export function UserDropdown({
                     background: 'none',
                     border: 'none',
                     textAlign: 'left',
-                    padding: '0.3rem 0',
-                    fontSize: '0.825rem',
-                    color: 'var(--accent-blue)',
+                    padding: '4px 0',
+                    fontSize: '13px',
+                    color: '#0052cc',
                     cursor: 'pointer',
-                    fontWeight: 600,
+                    fontWeight: 500,
                   }}
                 >
                   + Connect GitHub Account
@@ -170,11 +225,11 @@ export function UserDropdown({
                     background: 'none',
                     border: 'none',
                     textAlign: 'left',
-                    padding: '0.3rem 0',
-                    fontSize: '0.825rem',
-                    color: 'var(--accent-purple)',
+                    padding: '4px 0',
+                    fontSize: '13px',
+                    color: '#0052cc',
                     cursor: 'pointer',
-                    fontWeight: 600,
+                    fontWeight: 500,
                   }}
                 >
                   + Connect GitLab Account
@@ -184,37 +239,82 @@ export function UserDropdown({
           )}
 
           {/* Menu Items */}
-          <div className="dropdown-menu-list">
+          <div style={{ padding: '4px 0' }}>
             <button
               type="button"
-              className="dropdown-menu-item"
               data-testid="dropdown-profile-link"
               role="menuitem"
               onClick={() => {
                 setIsOpen(false);
                 onNavigateProfile();
               }}
+              style={{
+                width: '100%',
+                textAlign: 'left',
+                padding: '8px 16px',
+                background: 'none',
+                border: 'none',
+                fontSize: '14px',
+                color: '#172b4d',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                outline: 'none',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#ebecf0';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
-              <span style={{ fontSize: '1.1rem' }}>👤</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#42526e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
               <span>My Profile</span>
             </button>
           </div>
 
-          <div className="dropdown-divider" />
+          <div style={{ height: '1px', backgroundColor: '#dfe1e6', margin: '4px 0' }} />
 
           {/* Sign Out */}
-          <div className="dropdown-menu-list">
+          <div style={{ padding: '4px 0' }}>
             <button
               type="button"
-              className="dropdown-menu-item logout"
               data-testid="dropdown-logout-btn"
               role="menuitem"
               onClick={() => {
                 setIsOpen(false);
                 onLogout();
               }}
+              style={{
+                width: '100%',
+                textAlign: 'left',
+                padding: '8px 16px',
+                background: 'none',
+                border: 'none',
+                fontSize: '14px',
+                color: '#de350b',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                outline: 'none',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#ffebe6';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
             >
-              <span style={{ fontSize: '1.1rem' }}>🚪</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#de350b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
               <span>Sign Out</span>
             </button>
           </div>
