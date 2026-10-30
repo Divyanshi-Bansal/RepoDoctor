@@ -38,15 +38,9 @@ function validateEnvironment(): void {
   const clientSecret = process.env['GITHUB_APP_CLIENT_SECRET'] || process.env['GITHUB_CLIENT_SECRET'];
 
   if (!clientId || !clientSecret) {
-    if (process.env['NODE_ENV'] === 'production') {
-      throw new Error(
-        'Missing required environment variables: GITHUB_APP_CLIENT_ID and GITHUB_APP_CLIENT_SECRET must be set in production.',
-      );
-    } else {
-      logger.warn(
-        'GITHUB_APP_CLIENT_ID or GITHUB_APP_CLIENT_SECRET is not configured. Real GitHub OAuth login will not succeed until these credentials are provided in .env.',
-      );
-    }
+    logger.warn(
+      'GITHUB_APP_CLIENT_ID or GITHUB_APP_CLIENT_SECRET is not configured. GitHub OAuth features will be disabled until credentials are provided in environment variables.',
+    );
   }
 
   logger.log('Startup environment validation complete.');

@@ -80,6 +80,8 @@ export function buildDataSourceOptions(
   const isNeonOrSsl = Boolean(
     databaseUrl?.includes('sslmode=require') ||
     databaseUrl?.includes('neon.tech') ||
+    databaseUrl?.includes('render.com') ||
+    databaseUrl?.includes('dpg-') ||
     process.env['DB_SSL'] === 'true',
   );
 
