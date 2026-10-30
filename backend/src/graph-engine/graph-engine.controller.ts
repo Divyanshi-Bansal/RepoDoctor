@@ -54,14 +54,15 @@ export class GraphEngineController {
     @Param('id') repositoryId: string,
     @Req() req: AuthenticatedSessionRequest,
   ): Promise<RepositoryDashboardDto> {
-    if (!req.session?.githubAccessToken) {
+    const token = req.session?.githubAccessToken;
+    if (!token) {
       throw new UnauthorizedException(
         'GitHub account is not connected. Please authorize with GitHub to analyze repositories.',
       );
     }
     await this.analysisService.analyzeRepository(
       repositoryId,
-      req.session.githubAccessToken,
+      token,
     );
     return this.graphService.getRepositoryDashboard(repositoryId, req.user);
   }

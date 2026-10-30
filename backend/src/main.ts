@@ -79,4 +79,12 @@ async function bootstrap(): Promise<void> {
   new Logger('Bootstrap').log(`RepoDoctor API listening on port ${port}`);
 }
 
+process.on('unhandledRejection', (reason) => {
+  new Logger('Process').error(`Unhandled Rejection: ${reason}`);
+});
+
+process.on('uncaughtException', (err: any) => {
+  new Logger('Process').error(`Uncaught Exception: ${err?.message || err}`);
+});
+
 void bootstrap();

@@ -62,8 +62,28 @@ export class GraphEngineService {
   ): Promise<readonly RepositoryDto[]> {
     const actualUserId = options?.actualUserId;
     const gitlabToken = options?.gitlabToken;
-    const githubUsername = options?.githubUsername;
-    const gitlabUsername = options?.gitlabUsername;
+    let githubUsername = options?.githubUsername ?? null;
+    let gitlabUsername = options?.gitlabUsername ?? null;
+
+    // Resolve connected usernames from DB if actualUserId is provided and usernames were not passed
+    if (actualUserId && (!githubUsername || !gitlabUsername)) {
+      try {
+        const userRows = (await this.dataSource.query(
+          `SELECT github_username, gitlab_username FROM users WHERE id = $1 LIMIT 1`,
+          [actualUserId],
+        )) as Array<{ github_username: string | null; gitlab_username: string | null }>;
+        if (userRows && userRows.length > 0) {
+          if (!githubUsername && userRows[0].github_username) {
+            githubUsername = userRows[0].github_username;
+          }
+          if (!gitlabUsername && userRows[0].gitlab_username) {
+            gitlabUsername = userRows[0].gitlab_username;
+          }
+        }
+      } catch (err) {
+        this.logger.debug(`Could not resolve provider usernames from database for user ${actualUserId}: ${err}`);
+      }
+    }
 
     const discoveredIds = new Set<string>();
     const results: RepositoryDto[] = [];
@@ -71,7 +91,7 @@ export class GraphEngineService {
     // 1. Fetch remote GitHub repositories if user has a connected GitHub token
     if (accessToken) {
       try {
-        const response = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated', {
+        const response = await fetch('https://api.github.com/user/repos?per_page=100&affiliation=owner&sort=updated', {
           headers: {
             Authorization: `Bearer ${accessToken}`,
             Accept: 'application/vnd.github.v3+json',
@@ -95,6 +115,11 @@ export class GraphEngineService {
           for (const ghRepo of githubRepos) {
             const org = ghRepo.owner.login;
             const name = ghRepo.name;
+
+            // If a connected GitHub account is known, strictly ignore repos belonging to other accounts
+            if (githubUsername && org.toLowerCase() !== githubUsername.toLowerCase()) {
+              continue;
+            }
 
             // Find or pre-register in database
             let repoEntity = await this.repoRepo.findOne({
@@ -152,6 +177,10 @@ export class GraphEngineService {
             const org = parts.length > 1 ? parts.slice(0, -1).join('/') : 'gitlab';
             const name = parts[parts.length - 1];
 
+            if (gitlabUsername && org.toLowerCase() !== gitlabUsername.toLowerCase()) {
+              continue;
+            }
+
             let repoEntity = await this.repoRepo.findOne({
               where: { githubOrg: org, name },
             });
@@ -182,31 +211,34 @@ export class GraphEngineService {
       }
     }
 
-    // 3. Include local repositories: owned by user, matching usernames, or authorized via matrix
+    // 3. Include local repositories: strictly scoped by connected provider account(s) or dev-authorization
     const allRepos = await this.repoRepo.find({
       order: { updatedAt: 'DESC' },
     });
+
+    const hasConnectedProvider = Boolean(githubUsername || gitlabUsername);
 
     for (const repo of allRepos) {
       if (discoveredIds.has(repo.id)) continue;
 
       let isAllowed = false;
 
-      // Direct owner match
-      if (actualUserId && repo.ownerId === actualUserId) {
-        isAllowed = true;
-      }
-      // GitHub username match
-      else if (githubUsername && repo.githubOrg.toLowerCase() === githubUsername.toLowerCase()) {
-        isAllowed = true;
-      }
-      // GitLab username match
-      else if (gitlabUsername && repo.githubOrg.toLowerCase() === gitlabUsername.toLowerCase()) {
-        isAllowed = true;
-      }
-      // Authorized username match (e.g. dev-user, alice)
-      else if (this.authService.isAuthorizedForRepository(userId, repo)) {
-        isAllowed = true;
+      if (hasConnectedProvider) {
+        // When a GitHub account is connected, ONLY include repositories matching that GitHub account
+        if (githubUsername && repo.githubOrg.toLowerCase() === githubUsername.toLowerCase()) {
+          isAllowed = true;
+        }
+        // When a GitLab account is connected, include repositories matching that GitLab account
+        else if (gitlabUsername && repo.githubOrg.toLowerCase() === gitlabUsername.toLowerCase()) {
+          isAllowed = true;
+        }
+      } else {
+        // No connected provider (e.g. dev-user, alice, direct local owner)
+        if (actualUserId && repo.ownerId === actualUserId) {
+          isAllowed = true;
+        } else if (this.authService.isAuthorizedForRepository(userId, repo)) {
+          isAllowed = true;
+        }
       }
 
       if (isAllowed) {
