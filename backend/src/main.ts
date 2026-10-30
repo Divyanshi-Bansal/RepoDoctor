@@ -61,11 +61,32 @@ async function bootstrap(): Promise<void> {
     .map((o) => o.trim())
     .filter(Boolean);
 
+  if (process.env['FRONTEND_URL']) {
+    const feUrl = process.env['FRONTEND_URL'].trim();
+    if (!trustedOrigins.includes(feUrl)) {
+      trustedOrigins.push(feUrl);
+    }
+  }
+
   app.enableCors({
-    origin: trustedOrigins,
+    origin: (requestOrigin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!requestOrigin) {
+        return callback(null, true);
+      }
+      if (
+        trustedOrigins.includes(requestOrigin) ||
+        requestOrigin.endsWith('.vercel.app') ||
+        requestOrigin.includes('localhost') ||
+        requestOrigin.includes('127.0.0.1')
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'x-csrf-token'],
   });
 
   const port = process.env['PORT'] ? parseInt(process.env['PORT'], 10) : 3001;

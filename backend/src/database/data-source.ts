@@ -57,6 +57,8 @@ import { EvidenceEntity } from '../graph-engine/entities/evidence.entity.js';
 import { CodeEmbeddingEntity } from '../graph-engine/entities/code-embedding.entity.js';
 import { UserEntity } from '../auth/entities/user.entity.js';
 import { ProjectEntity } from '../graph-engine/entities/project.entity.js';
+import { InitialSchema1729000000000 } from '../migrations/1729000000000-InitialSchema.js';
+import { AddUsersAndProjects1729000000001 } from '../migrations/1729000000001-AddUsersAndProjects.js';
 
 /** All TypeORM entities registered in the application. */
 export const GRAPH_ENGINE_ENTITIES = [
@@ -67,6 +69,12 @@ export const GRAPH_ENGINE_ENTITIES = [
   CodeEmbeddingEntity,
   UserEntity,
   ProjectEntity,
+];
+
+/** All TypeORM migrations registered in the application. */
+export const GRAPH_ENGINE_MIGRATIONS = [
+  InitialSchema1729000000000,
+  AddUsersAndProjects1729000000001,
 ];
 
 /** Build a strongly-typed Postgres DataSourceOptions from environment variables.
@@ -91,8 +99,9 @@ export function buildDataSourceOptions(
         url: databaseUrl,
         ssl: isNeonOrSsl ? { rejectUnauthorized: false } : false,
         entities: GRAPH_ENGINE_ENTITIES,
-        migrations: ['dist/migrations/*.js'],
+        migrations: GRAPH_ENGINE_MIGRATIONS,
         migrationsTableName: 'typeorm_migrations',
+        migrationsRun: process.env['DB_MIGRATIONS_RUN'] !== 'false',
         synchronize: false,
         logging: process.env['DB_LOGGING'] === 'true',
       }
@@ -105,8 +114,9 @@ export function buildDataSourceOptions(
         database: process.env['DB_NAME'] ?? 'repodoctor',
         ssl: isNeonOrSsl ? { rejectUnauthorized: false } : false,
         entities: GRAPH_ENGINE_ENTITIES,
-        migrations: ['dist/migrations/*.js'],
+        migrations: GRAPH_ENGINE_MIGRATIONS,
         migrationsTableName: 'typeorm_migrations',
+        migrationsRun: process.env['DB_MIGRATIONS_RUN'] !== 'false',
         synchronize: false,
         logging: process.env['DB_LOGGING'] === 'true',
       };
